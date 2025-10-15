@@ -3,23 +3,19 @@ package httpc
 import (
 	"context"
 	"errors"
-	"fmt"
 	"log/slog"
 	"net/http"
 	"net/http/cookiejar"
-	"strings"
 	"time"
 
 	"github.com/grafvonb/kamunder/config"
-	authcore "github.com/grafvonb/kamunder/internal/services/auth/core"
+	"github.com/grafvonb/kamunder/internal/services/auth/authenticator"
 )
 
 var (
 	ErrNoHttpServiceInContext  = errors.New("no http service in context")
 	ErrInvalidServiceInContext = errors.New("invalid http service in context")
 )
-
-var _ http.RoundTripper = (*authTransport)(nil)
 
 type Service struct {
 	c   *http.Client
@@ -50,7 +46,7 @@ func WithCookieJar() Option {
 }
 
 // WithAuthEditor Install an auth editor transport now
-func WithAuthEditor(ed authcore.RequestEditor) Option {
+func WithAuthEditor(ed authenticator.RequestEditor) Option {
 	return func(s *Service) { s.InstallAuthEditor(ed) }
 }
 
@@ -62,7 +58,7 @@ func New(cfg *config.Config, log *slog.Logger, opts ...Option) (*Service, error)
 	if err != nil {
 		return nil, err
 	}
-	httpClient := &http.Client{Timeout: d}
+	httpClient := &http.Client{Timeout: d, Transport: &logTransport{log: log}}
 	s := &Service{c: httpClient, cfg: cfg, log: log}
 	for _, opt := range opts {
 		opt(s)
@@ -86,13 +82,13 @@ func (s *Service) InstallCookieJar() error {
 	return nil
 }
 
-func (s *Service) InstallAuthEditor(ed authcore.RequestEditor) {
+func (s *Service) InstallAuthEditor(ed authenticator.RequestEditor) {
 	s.c.Transport = &authTransport{base: s.c.Transport, editor: ed}
 }
 
 type authTransport struct {
 	base   http.RoundTripper
-	editor authcore.RequestEditor
+	editor authenticator.RequestEditor
 }
 
 func (t *authTransport) rt() http.RoundTripper {
@@ -105,14 +101,30 @@ func (t *authTransport) rt() http.RoundTripper {
 func (t *authTransport) RoundTrip(req *http.Request) (*http.Response, error) {
 	if t.editor != nil {
 		if err := t.editor(req.Context(), req); err != nil {
-			return nil, withHints(err)
+			return nil, err
 		}
 	}
-	resp, err := t.rt().RoundTrip(req)
-	if err != nil {
-		return nil, withHints(err)
+	return t.rt().RoundTrip(req)
+}
+
+type logTransport struct {
+	base http.RoundTripper
+	log  *slog.Logger
+}
+
+func (t *logTransport) rt() http.RoundTripper {
+	if t.base != nil {
+		return t.base
 	}
-	return resp, nil
+	if t.log == nil {
+		t.log = slog.Default()
+	}
+	return http.DefaultTransport
+}
+
+func (t *logTransport) RoundTrip(req *http.Request) (*http.Response, error) {
+	t.log.Debug("calling: " + req.URL.String())
+	return t.rt().RoundTrip(req)
 }
 
 type ctxKey struct{}
@@ -138,16 +150,4 @@ func MustClient(ctx context.Context) *http.Client {
 		return s.c
 	}
 	return http.DefaultClient
-}
-
-func withHints(err error) error {
-	msg := err.Error()
-	switch {
-	case strings.Contains(msg, "connection reset by peer"):
-		return fmt.Errorf("%w: is the server up and running?", err)
-	case strings.Contains(msg, "no such host"):
-		return fmt.Errorf("%w: DNS lookup failed", err)
-	default:
-		return err
-	}
 }

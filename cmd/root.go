@@ -4,12 +4,11 @@ import (
 	"errors"
 	"fmt"
 	"os"
-	"path/filepath"
 	"strings"
 
-	config2 "github.com/grafvonb/kamunder/config"
+	"github.com/grafvonb/kamunder/config"
 	"github.com/grafvonb/kamunder/internal/services/auth"
-	authcore "github.com/grafvonb/kamunder/internal/services/auth/core"
+	"github.com/grafvonb/kamunder/internal/services/auth/authenticator"
 	"github.com/grafvonb/kamunder/internal/services/httpc"
 	"github.com/grafvonb/kamunder/toolx"
 	"github.com/grafvonb/kamunder/toolx/logging"
@@ -18,10 +17,9 @@ import (
 )
 
 var (
-	flagShowConfig bool // show effective config and exit
+	flagShowConfig bool
 )
 
-// rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
 	Use:   "kamunder",
 	Short: "Kamunder is a CLI tool to interact with Camunda 8.",
@@ -30,71 +28,69 @@ var rootCmd = &cobra.Command{
 		if err := initViper(v, cmd); err != nil {
 			return err
 		}
-		// retrieve and validate config
-		cfg, err := retrieveConfig(v)
-		if err != nil {
-			return err
-		}
-		cmd.SetContext(cfg.ToContext(cmd.Context()))
 
 		if flagShowConfig {
-			cfgpath := v.ConfigFileUsed()
-			if cfgpath != "" {
-				cmd.Println("config loaded:", cfgpath)
+			cfg, err := retrieveConfig(v, false)
+			if err != nil {
+				return err
+			}
+			if p := v.ConfigFileUsed(); p != "" {
+				cmd.Println("config loaded:", p)
 			}
 			cmd.Println(cfg.String())
 			os.Exit(0)
+			return nil
 		}
-		// Setup logger
+
+		if isUtilityCommand(cmd) || hasHelpFlag(cmd) {
+			return nil
+		}
+
+		cfg, err := retrieveConfig(v, true)
+		if err != nil {
+			return err
+		}
+		ctx := cfg.ToContext(cmd.Context())
+
 		log := logging.New(logging.LoggerConfig{
 			Level:      v.GetString("log.level"),
 			Format:     v.GetString("log.format"),
 			WithSource: v.GetBool("log.with_source"),
 		})
-		cmd.SetContext(logging.ToContext(cmd.Context(), log))
+		ctx = logging.ToContext(ctx, log)
 
-		if cmd.Name() == "help" || cmd.Name() == "version" || cmd.Name() == "completion" {
-			return nil
-		}
-		if cmd.Flags().Changed("help") {
-			return nil
-		}
-
-		if err := cfg.Validate(); err != nil {
-			return fmt.Errorf("validate config: %w", err)
+		if pathcfg := v.ConfigFileUsed(); pathcfg != "" {
+			log.Debug("config loaded: " + pathcfg)
 		}
 
 		httpSvc, err := httpc.New(cfg, log, httpc.WithCookieJar())
 		if err != nil {
 			return fmt.Errorf("http service: %w", err)
 		}
-		authenticator, err := auth.BuildAuthenticator(cfg, httpSvc.Client(), log)
+		ator, err := auth.BuildAuthenticator(cfg, httpSvc.Client(), log)
 		if err != nil {
 			return fmt.Errorf("auth build: %w", err)
 		}
-		if err := authenticator.Init(cmd.Context()); err != nil {
+		if err := ator.Init(ctx); err != nil {
 			return fmt.Errorf("auth init: %w", err)
 		}
-		httpSvc.InstallAuthEditor(authenticator.Editor())
+		httpSvc.InstallAuthEditor(ator.Editor())
+		ctx = httpSvc.ToContext(ctx)
 
-		ctx := httpSvc.ToContext(cmd.Context())
-		ctx = authcore.ToContext(ctx, authenticator)
+		ctx = authenticator.ToContext(ctx, ator)
 		cmd.SetContext(ctx)
 
 		return nil
 	},
 	RunE: func(cmd *cobra.Command, args []string) error {
 		return cmd.Help()
-		// return runUI(cmd, args)
 	},
 	SilenceUsage:  true,
 	SilenceErrors: false,
 }
 
-// Execute adds all child commands to the root command and sets flags appropriately.
 func Execute() {
-	err := rootCmd.Execute()
-	if err != nil {
+	if err := rootCmd.Execute(); err != nil {
 		os.Exit(1)
 	}
 }
@@ -122,15 +118,12 @@ func init() {
 	pf.String("operate-base-url", "", "Operate API base URL")
 	pf.String("tasklist-base-url", "", "Tasklist API base URL")
 
-	// TODO show-config flag should be in a "config" subcommand
 	pf.BoolVar(&flagShowConfig, "show-config", false, "print effective config (secrets redacted)")
-
-	// TODO add --dry-run flag to commands that perform actions
 }
 
 func initViper(v *viper.Viper, cmd *cobra.Command) error {
-	// Resolve precedence: flags > env > config file > defaults
 	fs := cmd.Flags()
+
 	_ = v.BindPFlag("config", fs.Lookup("config"))
 
 	_ = v.BindPFlag("log.level", fs.Lookup("log-level"))
@@ -138,9 +131,12 @@ func initViper(v *viper.Viper, cmd *cobra.Command) error {
 	_ = v.BindPFlag("log.with_source", fs.Lookup("log-with-source"))
 
 	_ = v.BindPFlag("app.tenant", fs.Lookup("tenant"))
+
 	_ = v.BindPFlag("auth.token_url", fs.Lookup("auth-token-url"))
 	_ = v.BindPFlag("auth.client_id", fs.Lookup("auth-client-id"))
 	_ = v.BindPFlag("auth.client_secret", fs.Lookup("auth-client-secret"))
+	_ = v.BindPFlag("tmp.auth_scopes", fs.Lookup("auth-scopes"))
+
 	_ = v.BindPFlag("http.timeout", fs.Lookup("http-timeout"))
 
 	_ = v.BindPFlag("apis.version", fs.Lookup("camunda-apis-version"))
@@ -148,66 +144,62 @@ func initViper(v *viper.Viper, cmd *cobra.Command) error {
 	_ = v.BindPFlag("apis.operate_api.base_url", fs.Lookup("operate-base-url"))
 	_ = v.BindPFlag("apis.tasklist_api.base_url", fs.Lookup("tasklist-base-url"))
 
-	_ = v.BindPFlag("tmp.auth_scopes", fs.Lookup("auth-scopes"))
+	v.Set("apis.camunda_api.key", config.CamundaApiKeyConst)
+	v.Set("apis.operate_api.key", config.OperateApiKeyConst)
+	v.Set("apis.tasklist_api.key", config.TasklistApiKeyConst)
 
-	// Force hardcoded keys
-	v.Set("apis.camunda_api.key", config2.CamundaApiKeyConst)
-	v.Set("apis.operate_api.key", config2.OperateApiKeyConst)
-	v.Set("apis.tasklist_api.key", config2.TasklistApiKeyConst)
-
-	// Defaults
 	v.SetDefault("http.timeout", "30s")
 
-	// Config file discovery
-	if cfgFile := v.GetString("config"); cfgFile != "" {
-		v.SetConfigFile(cfgFile)
-	} else {
-		v.SetConfigName("config")
-		v.SetConfigType("yaml")
-
-		// Search config paths (in order):
-		// Look in the current dir (./config.yaml)
-		// Then $XDG_CONFIG_HOME/kamunder/config.yaml
-		// Then $HOME/.config/kamunder/config.yaml
-		// Finally fallback to $HOME/.kamunder/config.yaml
-		v.AddConfigPath(".")
-		if xdg, ok := os.LookupEnv("XDG_CONFIG_HOME"); ok && xdg != "" {
-			v.AddConfigPath(filepath.Join(xdg, "kamunder"))
-		} else if home, err := os.UserHomeDir(); err == nil {
-			v.AddConfigPath(filepath.Join(home, ".config", "kamunder"))
-		}
-		if home, err := os.UserHomeDir(); err == nil {
-			v.AddConfigPath(filepath.Join(home, ".kamunder"))
-		}
-	}
-
-	// ENV: CAMUNDER_AUTH_CLIENT_ID, etc.
 	v.SetEnvPrefix("KAMUNDER")
 	v.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
 	v.AutomaticEnv()
 
-	// Read config (ignore "not found")
+	// Config file resolution and read
+	if p := v.GetString("config"); p != "" {
+		v.SetConfigFile(p)
+	} else {
+		v.SetConfigName("config")
+		v.SetConfigType("yaml")
+		v.AddConfigPath(".")
+		v.AddConfigPath("$XDG_CONFIG_HOME/kamunder")
+		v.AddConfigPath("$HOME/.config/kamunder")
+		v.AddConfigPath("$HOME/.kamunder")
+		v.AddConfigPath("/etc/kamunder")
+	}
 	if err := v.ReadInConfig(); err != nil {
 		var nf viper.ConfigFileNotFoundError
-		if !errors.As(err, &nf) {
-			return fmt.Errorf("read config: %w", err)
+		if !errors.As(err, &nf) || v.GetString("config") != "" {
+			return fmt.Errorf("read config file: %w", err)
 		}
 	}
 	return nil
 }
 
-func retrieveConfig(v *viper.Viper) (*config2.Config, error) {
-	var cfg config2.Config
+func retrieveConfig(v *viper.Viper, validate bool) (*config.Config, error) {
+	var cfg config.Config
 	if err := v.Unmarshal(&cfg); err != nil {
 		return nil, fmt.Errorf("unmarshal config: %w", err)
 	}
-	if tmpScopes := v.GetStringMapString("tmp.auth_scopes"); len(tmpScopes) > 0 {
+
+	if tmp := v.GetStringMapString("tmp.auth_scopes"); len(tmp) > 0 {
 		if cfg.Auth.OAuth2.Scopes == nil {
-			cfg.Auth.OAuth2.Scopes = make(map[string]string, len(tmpScopes))
+			cfg.Auth.OAuth2.Scopes = make(map[string]string, len(tmp))
 		}
-		for k, scope := range tmpScopes {
-			cfg.Auth.OAuth2.Scopes[strings.TrimSpace(k)] = strings.TrimSpace(scope)
+		for k, scope := range tmp {
+			k = strings.TrimSpace(k)
+			scope = strings.TrimSpace(scope)
+			if k == "" || scope == "" {
+				continue
+			}
+			cfg.Auth.OAuth2.Scopes[k] = scope
 		}
 	}
+
+	if validate {
+		if err := cfg.Validate(); err != nil {
+			return nil, fmt.Errorf("validate config: %w", err)
+		}
+	}
+
 	return &cfg, nil
 }

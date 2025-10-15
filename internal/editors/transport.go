@@ -3,12 +3,12 @@ package editors
 import (
 	"net/http"
 
-	authcore "github.com/grafvonb/kamunder/internal/services/auth/core"
+	"github.com/grafvonb/kamunder/internal/services/auth/authenticator"
 )
 
 type authTransport struct {
 	base   http.RoundTripper
-	editor authcore.RequestEditor
+	editor authenticator.RequestEditor
 }
 
 func (t *authTransport) rt() http.RoundTripper {
@@ -27,7 +27,7 @@ func (t *authTransport) RoundTrip(req *http.Request) (*http.Response, error) {
 	return t.rt().RoundTrip(req)
 }
 
-func WithAuth(httpClient *http.Client, editor authcore.RequestEditor) *http.Client {
+func WithAuth(httpClient *http.Client, editor authenticator.RequestEditor) *http.Client {
 	if httpClient == nil {
 		httpClient = &http.Client{}
 	}

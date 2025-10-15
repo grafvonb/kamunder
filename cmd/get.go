@@ -94,19 +94,19 @@ var getCmd = &cobra.Command{
 				}
 			} else {
 				log.Debug(fmt.Sprintf("searching by filter: %v", searchFilterOpts))
-				pdsr, err := cli.SearchProcessDefinitions(cmd.Context(), searchFilterOpts, maxSearchSize)
+				pds, err := cli.SearchProcessDefinitions(cmd.Context(), searchFilterOpts, maxSearchSize)
 				if err != nil {
 					log.Error(fmt.Sprintf("error fetching process definitions: %v", err))
 					return
 				}
 				if flagKeysOnly {
-					err = listKeyOnlyProcessDefinitionsView(cmd, pdsr)
+					err = listKeyOnlyProcessDefinitionsView(cmd, pds)
 					if err != nil {
 						log.Error(fmt.Sprintf("error rendering keys-only view: %v", err))
 					}
 					return
 				}
-				err = listProcessDefinitionsView(cmd, pdsr)
+				err = listProcessDefinitionsView(cmd, pds)
 				if err != nil {
 					log.Error(fmt.Sprintf("error rendering items view: %v", err))
 				}

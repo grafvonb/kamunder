@@ -1,4 +1,4 @@
-package core
+package authenticator
 
 import (
 	"context"

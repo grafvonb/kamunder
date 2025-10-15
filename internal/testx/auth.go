@@ -3,7 +3,7 @@ package testx
 import (
 	"net/http"
 
-	config2 "github.com/grafvonb/kamunder/config"
+	"github.com/grafvonb/kamunder/config"
 	"github.com/grafvonb/kamunder/internal/clients/auth/oauth2"
 )
 
@@ -27,31 +27,31 @@ func TestAuthJSON200Response(status int, token string, raw string) *oauth2.Reque
 	}
 }
 
-func TestConfig() *config2.Config {
-	return &config2.Config{
-		App: config2.App{
+func TestConfig() *config.Config {
+	return &config.Config{
+		App: config.App{
 			Tenant: "tenant",
 		},
-		Auth: config2.Auth{
-			OAuth2: config2.AuthOAuth2ClientCredentials{
+		Auth: config.Auth{
+			OAuth2: config.AuthOAuth2ClientCredentials{
 				TokenURL:     "http://localhost/token",
 				ClientID:     "test",
 				ClientSecret: "test",
 			},
-			Cookie: config2.AuthCookieSession{
+			Cookie: config.AuthCookieSession{
 				BaseURL:  "http://localhost/cookie",
 				Username: "test",
 				Password: "test",
 			},
 		},
-		APIs: config2.APIs{
-			Camunda: config2.API{
+		APIs: config.APIs{
+			Camunda: config.API{
 				BaseURL: "http://localhost/camunda/v2",
 			},
-			Operate: config2.API{
+			Operate: config.API{
 				BaseURL: "http://localhost/operate",
 			},
-			Tasklist: config2.API{
+			Tasklist: config.API{
 				BaseURL: "http://localhost/tasklist",
 			},
 		},

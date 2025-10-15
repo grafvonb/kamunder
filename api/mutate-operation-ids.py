@@ -30,8 +30,6 @@ def update_operation_ids(input_file: str):
     with open(output_file, "w", encoding="utf-8") as f:
         yaml.dump(spec, f, sort_keys=False, allow_unicode=True)
 
-    print(f"Updated file written to: {output_file}")
-
 if __name__ == "__main__":
     if len(sys.argv) < 2:
         print("Usage: python mutate-operation-ids.py <inputfile.yaml>")

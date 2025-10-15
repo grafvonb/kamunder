@@ -8,7 +8,8 @@
 ./api/generate-client.sh ./api/camunda-docs/api/camunda/camunda-openapi.yaml ./internal/clients/camunda/v88/camunda/client.gen.go camunda
 
 python ./api/mutate-operation-ids.py ./api/camunda-docs/api/operate/operate-openapi.yaml
-./api/generate-client.sh ./api/camunda-docs/api/operate/operate-openapi-oids-updated.yaml ./internal/clients/camunda/v88/operate/client.gen.go operate
+python ./api/mutate-remove-sort-values.py ./api/camunda-docs/api/operate/operate-openapi-oids-updated.yaml
+./api/generate-client.sh ./api/camunda-docs/api/operate/operate-openapi-oids-updated-sortvalues-removed.yaml ./internal/clients/camunda/v88/operate/client.gen.go operate
 
 ./api/generate-client.sh ./api/camunda-docs/api/tasklist/tasklist-openapi.yaml ./internal/clients/camunda/v88/tasklist/client.gen.go tasklist
 
@@ -17,7 +18,8 @@ python ./api/mutate-operation-ids.py ./api/camunda-docs/api/operate/operate-open
 ./api/generate-client.sh ./api/camunda-docs/api/camunda/version-8.7/camunda-openapi.yaml ./internal/clients/camunda/v87/camunda/client.gen.go camunda
 
 python ./api/mutate-operation-ids.py ./api/camunda-docs/api/operate/version-8.7/operate-openapi.yaml
-./api/generate-client.sh ./api/camunda-docs/api/operate/version-8.7/operate-openapi-oids-updated.yaml ./internal/clients/camunda/v87/operate/client.gen.go operate
+python ./api/mutate-remove-sort-values.py ./api/camunda-docs/api/operate/version-8.7/operate-openapi-oids-updated.yaml
+./api/generate-client.sh ./api/camunda-docs/api/operate/version-8.7/operate-openapi-oids-updated-sortvalues-removed.yaml ./internal/clients/camunda/v87/operate/client.gen.go operate
 
 ./api/generate-client.sh ./api/camunda-docs/api/tasklist/version-8.7/tasklist-openapi.yaml ./internal/clients/camunda/v87/tasklist/client.gen.go tasklist
 

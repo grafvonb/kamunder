@@ -348,58 +348,50 @@ type QueryVariable struct {
 
 // ResultsDecisionDefinition defines model for ResultsDecisionDefinition.
 type ResultsDecisionDefinition struct {
-	Items      *[]DecisionDefinition     `json:"items,omitempty"`
-	SortValues *[]map[string]interface{} `json:"sortValues,omitempty"`
-	Total      *int64                    `json:"total,omitempty"`
+	Items *[]DecisionDefinition `json:"items,omitempty"`
+	Total *int64                `json:"total,omitempty"`
 }
 
 // ResultsDecisionInstance defines model for ResultsDecisionInstance.
 type ResultsDecisionInstance struct {
-	Items      *[]DecisionInstance       `json:"items,omitempty"`
-	SortValues *[]map[string]interface{} `json:"sortValues,omitempty"`
-	Total      *int64                    `json:"total,omitempty"`
+	Items *[]DecisionInstance `json:"items,omitempty"`
+	Total *int64              `json:"total,omitempty"`
 }
 
 // ResultsDecisionRequirements defines model for ResultsDecisionRequirements.
 type ResultsDecisionRequirements struct {
-	Items      *[]DecisionRequirements   `json:"items,omitempty"`
-	SortValues *[]map[string]interface{} `json:"sortValues,omitempty"`
-	Total      *int64                    `json:"total,omitempty"`
+	Items *[]DecisionRequirements `json:"items,omitempty"`
+	Total *int64                  `json:"total,omitempty"`
 }
 
 // ResultsFlowNodeInstance defines model for ResultsFlowNodeInstance.
 type ResultsFlowNodeInstance struct {
-	Items      *[]FlowNodeInstance       `json:"items,omitempty"`
-	SortValues *[]map[string]interface{} `json:"sortValues,omitempty"`
-	Total      *int64                    `json:"total,omitempty"`
+	Items *[]FlowNodeInstance `json:"items,omitempty"`
+	Total *int64              `json:"total,omitempty"`
 }
 
 // ResultsIncident defines model for ResultsIncident.
 type ResultsIncident struct {
-	Items      *[]Incident               `json:"items,omitempty"`
-	SortValues *[]map[string]interface{} `json:"sortValues,omitempty"`
-	Total      *int64                    `json:"total,omitempty"`
+	Items *[]Incident `json:"items,omitempty"`
+	Total *int64      `json:"total,omitempty"`
 }
 
 // ResultsProcessDefinition defines model for ResultsProcessDefinition.
 type ResultsProcessDefinition struct {
-	Items      *[]ProcessDefinition      `json:"items,omitempty"`
-	SortValues *[]map[string]interface{} `json:"sortValues,omitempty"`
-	Total      *int64                    `json:"total,omitempty"`
+	Items *[]ProcessDefinition `json:"items,omitempty"`
+	Total *int64               `json:"total,omitempty"`
 }
 
 // ResultsProcessInstance defines model for ResultsProcessInstance.
 type ResultsProcessInstance struct {
-	Items      *[]ProcessInstance        `json:"items,omitempty"`
-	SortValues *[]map[string]interface{} `json:"sortValues,omitempty"`
-	Total      *int64                    `json:"total,omitempty"`
+	Items *[]ProcessInstance `json:"items,omitempty"`
+	Total *int64             `json:"total,omitempty"`
 }
 
 // ResultsVariable defines model for ResultsVariable.
 type ResultsVariable struct {
-	Items      *[]Variable               `json:"items,omitempty"`
-	SortValues *[]map[string]interface{} `json:"sortValues,omitempty"`
-	Total      *int64                    `json:"total,omitempty"`
+	Items *[]Variable `json:"items,omitempty"`
+	Total *int64      `json:"total,omitempty"`
 }
 
 // Sort defines model for Sort.

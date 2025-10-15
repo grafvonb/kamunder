@@ -12,11 +12,11 @@ import (
 	"strings"
 
 	"github.com/grafvonb/kamunder/config"
-	authcore "github.com/grafvonb/kamunder/internal/services/auth/core"
+	"github.com/grafvonb/kamunder/internal/services/auth/authenticator"
 	"github.com/grafvonb/kamunder/internal/services/common"
 )
 
-var _ authcore.Authenticator = (*Service)(nil)
+var _ authenticator.Authenticator = (*Service)(nil)
 
 type Service struct {
 	cfg     *config.Config
@@ -119,7 +119,7 @@ func (s *Service) Init(ctx context.Context) error {
 
 // Editor adds standard headers and ensures login happened before non-login calls.
 // Use this with your generated clients’ RequestEditor hook, or call before building requests.
-func (s *Service) Editor() authcore.RequestEditor {
+func (s *Service) Editor() authenticator.RequestEditor {
 	return func(ctx context.Context, req *http.Request) error {
 		sameHost := strings.EqualFold(req.URL.Host, s.baseURL.Host)
 		isLogin := strings.Contains(req.URL.Path, "/api/login")

@@ -13,8 +13,8 @@ import (
 	"sync"
 
 	"github.com/grafvonb/kamunder/config"
-	auth "github.com/grafvonb/kamunder/internal/clients/auth/oauth2"
-	authcore "github.com/grafvonb/kamunder/internal/services/auth/core"
+	"github.com/grafvonb/kamunder/internal/clients/auth/oauth2"
+	"github.com/grafvonb/kamunder/internal/services/auth/authenticator"
 	"github.com/grafvonb/kamunder/internal/services/common"
 )
 
@@ -66,7 +66,7 @@ func New(cfg *config.Config, apiHTTP *http.Client, log *slog.Logger, opts ...Opt
 	cfg.APIs.Operate.BaseURL = common.DefaultVal(cfg.APIs.Operate.BaseURL, cfg.APIs.Camunda.BaseURL)
 	cfg.APIs.Tasklist.BaseURL = common.DefaultVal(cfg.APIs.Tasklist.BaseURL, cfg.APIs.Camunda.BaseURL)
 
-	c, err := auth.NewClientWithResponses(tu.String(), auth.WithHTTPClient(tokenHTTP))
+	c, err := oauth2.NewClientWithResponses(tu.String(), oauth2.WithHTTPClient(tokenHTTP))
 	if err != nil {
 		return nil, fmt.Errorf("init auth client: %w", err)
 	}
@@ -91,7 +91,7 @@ func (s *Service) Name() string { return "oauth2" }
 
 func (s *Service) Init(_ context.Context) error { return nil }
 
-func (s *Service) Editor() authcore.RequestEditor {
+func (s *Service) Editor() authenticator.RequestEditor {
 	return func(ctx context.Context, req *http.Request) error {
 		// Do NOT add auth to the token request itself.
 		if sameURL(req.URL, s.tokenURL) {

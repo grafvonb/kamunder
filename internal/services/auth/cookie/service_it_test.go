@@ -10,7 +10,7 @@ import (
 	"testing"
 	"time"
 
-	config2 "github.com/grafvonb/kamunder/config"
+	"github.com/grafvonb/kamunder/config"
 	"github.com/grafvonb/kamunder/internal/services/auth/cookie"
 	"github.com/grafvonb/kamunder/internal/testx"
 	"github.com/stretchr/testify/require"
@@ -21,10 +21,10 @@ func TestCookie_Login_OK_IT(t *testing.T) {
 		t.Skip("short mode")
 	}
 
-	cfg := &config2.Config{
-		Auth: config2.Auth{
-			Mode: config2.ModeCookie,
-			Cookie: config2.AuthCookieSession{
+	cfg := &config.Config{
+		Auth: config.Auth{
+			Mode: config.ModeCookie,
+			Cookie: config.AuthCookieSession{
 				BaseURL:  testx.RequireEnvWithPrefix(t, "COOKIE_BASE_URL"),
 				Username: testx.RequireEnvWithPrefix(t, "COOKIE_USERNAME"),
 				Password: testx.RequireEnvWithPrefix(t, "COOKIE_PASSWORD"),

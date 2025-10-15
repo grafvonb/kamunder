@@ -1,6 +1,6 @@
 module github.com/grafvonb/kamunder
 
-go 1.25.1
+go 1.25.3
 
 require (
 	github.com/oapi-codegen/nullable v1.1.0
