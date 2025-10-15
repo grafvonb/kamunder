@@ -1,0 +1,27 @@
+all: false
+dir: '{{.InterfaceDir}}'
+filename: '{{.InterfaceName}}_mock.go'
+force-file-write: true
+formatter: goimports
+include-auto-generated: false
+log-level: info
+structname: '{{.Mock}}{{.InterfaceName}}'
+pkgname: '{{.SrcPackageName}}mock'
+recursive: false
+require-template-schema-exists: true
+template: testify
+template-schema: '{{.Template}}.schema.json'
+
+packages:
+  github.com/grafvonb/camunder/internal/services/auth:
+    config:
+      all: true
+      dir: 'internal/services/auth/mocks'              # unique per package
+  github.com/grafvonb/camunder/internal/services/cluster/v87:
+    config:
+      all: true
+      dir: 'internal/services/cluster/v87/mocks'      # include version
+  github.com/grafvonb/camunder/internal/services/cluster/v88:
+    config:
+      all: true
+      dir: 'internal/services/cluster/v88/mocks'      # include version

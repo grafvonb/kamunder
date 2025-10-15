@@ -1,0 +1,9 @@
+auth:
+  mode: "cookie"
+  cookie:
+    base_url: "http://localhost:8090"
+
+apis:
+  version: "87"
+  camunda_api:
+    base_url: "http://localhost:8090/v2"
