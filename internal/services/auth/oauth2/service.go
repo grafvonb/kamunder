@@ -12,10 +12,10 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/grafvonb/camunder/config"
-	auth "github.com/grafvonb/camunder/internal/clients/auth/oauth2"
-	authcore "github.com/grafvonb/camunder/internal/services/auth/core"
-	"github.com/grafvonb/camunder/internal/services/common"
+	"github.com/grafvonb/kamunder/config"
+	auth "github.com/grafvonb/kamunder/internal/clients/auth/oauth2"
+	authcore "github.com/grafvonb/kamunder/internal/services/auth/core"
+	"github.com/grafvonb/kamunder/internal/services/common"
 )
 
 type TargetResolver func(*http.Request) string

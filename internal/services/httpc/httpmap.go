@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"net/http"
 
-	d "github.com/grafvonb/camunder/internal/domain"
+	d "github.com/grafvonb/kamunder/internal/domain"
 )
 
 func HttpStatusErr(hr *http.Response, body []byte) error {

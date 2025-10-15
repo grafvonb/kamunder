@@ -3,9 +3,9 @@ package processdefinition
 import (
 	"context"
 
-	d "github.com/grafvonb/camunder/internal/domain"
-	v87 "github.com/grafvonb/camunder/internal/services/processdefinition/v87"
-	v88 "github.com/grafvonb/camunder/internal/services/processdefinition/v88"
+	d "github.com/grafvonb/kamunder/internal/domain"
+	v87 "github.com/grafvonb/kamunder/internal/services/processdefinition/v87"
+	v88 "github.com/grafvonb/kamunder/internal/services/processdefinition/v88"
 )
 
 type API interface {

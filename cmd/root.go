@@ -7,12 +7,12 @@ import (
 	"path/filepath"
 	"strings"
 
-	config2 "github.com/grafvonb/camunder/config"
-	"github.com/grafvonb/camunder/internal/services/auth"
-	authcore "github.com/grafvonb/camunder/internal/services/auth/core"
-	"github.com/grafvonb/camunder/internal/services/httpc"
-	"github.com/grafvonb/camunder/toolx"
-	"github.com/grafvonb/camunder/toolx/logging"
+	config2 "github.com/grafvonb/kamunder/config"
+	"github.com/grafvonb/kamunder/internal/services/auth"
+	authcore "github.com/grafvonb/kamunder/internal/services/auth/core"
+	"github.com/grafvonb/kamunder/internal/services/httpc"
+	"github.com/grafvonb/kamunder/toolx"
+	"github.com/grafvonb/kamunder/toolx/logging"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -23,8 +23,8 @@ var (
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
-	Use:   "camunder",
-	Short: "Camunder is a CLI tool to interact with Camunda 8.",
+	Use:   "kamunder",
+	Short: "Kamunder is a CLI tool to interact with Camunda 8.",
 	PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
 		v := viper.New()
 		if err := initViper(v, cmd); err != nil {
@@ -167,22 +167,22 @@ func initViper(v *viper.Viper, cmd *cobra.Command) error {
 
 		// Search config paths (in order):
 		// Look in the current dir (./config.yaml)
-		// Then $XDG_CONFIG_HOME/camunder/config.yaml
-		// Then $HOME/.config/camunder/config.yaml
-		// Finally fallback to $HOME/.camunder/config.yaml
+		// Then $XDG_CONFIG_HOME/kamunder/config.yaml
+		// Then $HOME/.config/kamunder/config.yaml
+		// Finally fallback to $HOME/.kamunder/config.yaml
 		v.AddConfigPath(".")
 		if xdg, ok := os.LookupEnv("XDG_CONFIG_HOME"); ok && xdg != "" {
-			v.AddConfigPath(filepath.Join(xdg, "camunder"))
+			v.AddConfigPath(filepath.Join(xdg, "kamunder"))
 		} else if home, err := os.UserHomeDir(); err == nil {
-			v.AddConfigPath(filepath.Join(home, ".config", "camunder"))
+			v.AddConfigPath(filepath.Join(home, ".config", "kamunder"))
 		}
 		if home, err := os.UserHomeDir(); err == nil {
-			v.AddConfigPath(filepath.Join(home, ".camunder"))
+			v.AddConfigPath(filepath.Join(home, ".kamunder"))
 		}
 	}
 
 	// ENV: CAMUNDER_AUTH_CLIENT_ID, etc.
-	v.SetEnvPrefix("CAMUNDER")
+	v.SetEnvPrefix("KAMUNDER")
 	v.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
 	v.AutomaticEnv()
 

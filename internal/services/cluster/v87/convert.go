@@ -1,9 +1,9 @@
 package v87
 
 import (
-	camundav87 "github.com/grafvonb/camunder/internal/clients/camunda/v87/camunda"
-	d "github.com/grafvonb/camunder/internal/domain"
-	"github.com/grafvonb/camunder/toolx"
+	camundav87 "github.com/grafvonb/kamunder/internal/clients/camunda/v87/camunda"
+	d "github.com/grafvonb/kamunder/internal/domain"
+	"github.com/grafvonb/kamunder/toolx"
 )
 
 func fromTopologyResponse(r camundav87.TopologyResponse) d.Topology {

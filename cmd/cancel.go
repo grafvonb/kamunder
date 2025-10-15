@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/grafvonb/camunder/internal/services/processinstance"
-	"github.com/grafvonb/camunder/toolx/logging"
+	"github.com/grafvonb/kamunder/internal/services/processinstance"
+	"github.com/grafvonb/kamunder/toolx/logging"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )

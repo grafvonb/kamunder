@@ -7,8 +7,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/grafvonb/camunder/config"
-	d "github.com/grafvonb/camunder/internal/domain"
+	"github.com/grafvonb/kamunder/config"
+	d "github.com/grafvonb/kamunder/internal/domain"
 )
 
 type PIGetter interface {

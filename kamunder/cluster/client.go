@@ -3,7 +3,7 @@ package cluster
 import (
 	"context"
 
-	csvc "github.com/grafvonb/camunder/internal/services/cluster"
+	csvc "github.com/grafvonb/kamunder/internal/services/cluster"
 )
 
 type API interface {

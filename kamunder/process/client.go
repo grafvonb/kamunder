@@ -3,10 +3,10 @@ package process
 import (
 	"context"
 
-	d "github.com/grafvonb/camunder/internal/domain"
-	pdsvc "github.com/grafvonb/camunder/internal/services/processdefinition"
-	pisvc "github.com/grafvonb/camunder/internal/services/processinstance"
-	"github.com/grafvonb/camunder/toolx"
+	d "github.com/grafvonb/kamunder/internal/domain"
+	pdsvc "github.com/grafvonb/kamunder/internal/services/processdefinition"
+	pisvc "github.com/grafvonb/kamunder/internal/services/processinstance"
+	"github.com/grafvonb/kamunder/toolx"
 )
 
 type API interface {

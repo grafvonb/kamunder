@@ -5,11 +5,11 @@ import (
 	"log/slog"
 	"net/http"
 
-	"github.com/grafvonb/camunder/config"
-	"github.com/grafvonb/camunder/internal/services"
-	v87 "github.com/grafvonb/camunder/internal/services/processdefinition/v87"
-	v88 "github.com/grafvonb/camunder/internal/services/processdefinition/v88"
-	"github.com/grafvonb/camunder/toolx"
+	"github.com/grafvonb/kamunder/config"
+	"github.com/grafvonb/kamunder/internal/services"
+	v87 "github.com/grafvonb/kamunder/internal/services/processdefinition/v87"
+	v88 "github.com/grafvonb/kamunder/internal/services/processdefinition/v88"
+	"github.com/grafvonb/kamunder/toolx"
 )
 
 func New(cfg *config.Config, httpClient *http.Client, log *slog.Logger) (API, error) {

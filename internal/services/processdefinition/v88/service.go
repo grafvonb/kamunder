@@ -6,11 +6,11 @@ import (
 	"log/slog"
 	"net/http"
 
-	"github.com/grafvonb/camunder/config"
-	operatev88 "github.com/grafvonb/camunder/internal/clients/camunda/v88/operate"
-	d "github.com/grafvonb/camunder/internal/domain"
-	"github.com/grafvonb/camunder/internal/services/httpc"
-	"github.com/grafvonb/camunder/toolx"
+	"github.com/grafvonb/kamunder/config"
+	operatev88 "github.com/grafvonb/kamunder/internal/clients/camunda/v88/operate"
+	d "github.com/grafvonb/kamunder/internal/domain"
+	"github.com/grafvonb/kamunder/internal/services/httpc"
+	"github.com/grafvonb/kamunder/toolx"
 )
 
 type Service struct {

@@ -8,9 +8,9 @@ import (
 	"testing"
 	"time"
 
-	config2 "github.com/grafvonb/camunder/config"
-	"github.com/grafvonb/camunder/internal/services/auth/cookie"
-	"github.com/grafvonb/camunder/internal/testx"
+	config2 "github.com/grafvonb/kamunder/config"
+	"github.com/grafvonb/kamunder/internal/services/auth/cookie"
+	"github.com/grafvonb/kamunder/internal/testx"
 	"github.com/stretchr/testify/require"
 )
 

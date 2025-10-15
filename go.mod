@@ -1,4 +1,4 @@
-module github.com/grafvonb/camunder
+module github.com/grafvonb/kamunder
 
 go 1.25.1
 

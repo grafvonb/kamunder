@@ -11,9 +11,9 @@ import (
 	"net/url"
 	"strings"
 
-	"github.com/grafvonb/camunder/config"
-	authcore "github.com/grafvonb/camunder/internal/services/auth/core"
-	"github.com/grafvonb/camunder/internal/services/common"
+	"github.com/grafvonb/kamunder/config"
+	authcore "github.com/grafvonb/kamunder/internal/services/auth/core"
+	"github.com/grafvonb/kamunder/internal/services/common"
 )
 
 var _ authcore.Authenticator = (*Service)(nil)

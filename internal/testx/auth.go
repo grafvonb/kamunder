@@ -3,8 +3,8 @@ package testx
 import (
 	"net/http"
 
-	config2 "github.com/grafvonb/camunder/config"
-	"github.com/grafvonb/camunder/internal/clients/auth/oauth2"
+	config2 "github.com/grafvonb/kamunder/config"
+	"github.com/grafvonb/kamunder/internal/clients/auth/oauth2"
 )
 
 type tokenJSON200 = struct {

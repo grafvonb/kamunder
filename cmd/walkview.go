@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/grafvonb/camunder/kamunder/process"
+	"github.com/grafvonb/kamunder/kamunder/process"
 )
 
 type Chain map[int64]process.ProcessInstance

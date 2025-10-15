@@ -1,9 +1,9 @@
 package v88
 
 import (
-	operatev88 "github.com/grafvonb/camunder/internal/clients/camunda/v88/operate"
-	d "github.com/grafvonb/camunder/internal/domain"
-	"github.com/grafvonb/camunder/toolx"
+	operatev88 "github.com/grafvonb/kamunder/internal/clients/camunda/v88/operate"
+	d "github.com/grafvonb/kamunder/internal/domain"
+	"github.com/grafvonb/kamunder/toolx"
 )
 
 //nolint:unused

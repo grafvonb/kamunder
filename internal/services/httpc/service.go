@@ -10,8 +10,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/grafvonb/camunder/config"
-	authcore "github.com/grafvonb/camunder/internal/services/auth/core"
+	"github.com/grafvonb/kamunder/config"
+	authcore "github.com/grafvonb/kamunder/internal/services/auth/core"
 )
 
 var (

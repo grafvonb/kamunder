@@ -3,7 +3,7 @@ package v88
 import (
 	"context"
 
-	operatev88 "github.com/grafvonb/camunder/internal/clients/camunda/v88/operate"
+	operatev88 "github.com/grafvonb/kamunder/internal/clients/camunda/v88/operate"
 )
 
 type GenClusterClient interface {

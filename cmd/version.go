@@ -28,7 +28,7 @@ var versionCmd = &cobra.Command{
 			cmd.Println(ToJSONString(out))
 			return
 		}
-		cmd.Printf("Camunder version %s, commit %s, built at %s\n", version, commit, date)
+		cmd.Printf("Kamunder version %s, commit %s, built at %s\n", version, commit, date)
 	},
 }
 

@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/grafvonb/camunder/internal/services/processinstance"
-	piapi "github.com/grafvonb/camunder/kamunder/process"
-	"github.com/grafvonb/camunder/toolx/logging"
+	"github.com/grafvonb/kamunder/internal/services/processinstance"
+	piapi "github.com/grafvonb/kamunder/kamunder/process"
+	"github.com/grafvonb/kamunder/toolx/logging"
 	"github.com/spf13/cobra"
 )
 

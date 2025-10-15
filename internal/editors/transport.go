@@ -3,7 +3,7 @@ package editors
 import (
 	"net/http"
 
-	authcore "github.com/grafvonb/camunder/internal/services/auth/core"
+	authcore "github.com/grafvonb/kamunder/internal/services/auth/core"
 )
 
 type authTransport struct {

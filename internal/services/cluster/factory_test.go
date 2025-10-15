@@ -6,8 +6,8 @@ import (
 
 	"log/slog"
 
-	config2 "github.com/grafvonb/camunder/config"
-	"github.com/grafvonb/camunder/toolx"
+	config2 "github.com/grafvonb/kamunder/config"
+	"github.com/grafvonb/kamunder/toolx"
 	"github.com/stretchr/testify/require"
 )
 

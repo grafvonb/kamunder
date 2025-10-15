@@ -6,14 +6,14 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/grafvonb/camunder/config"
-	csvc "github.com/grafvonb/camunder/internal/services/cluster"
-	pdsvc "github.com/grafvonb/camunder/internal/services/processdefinition"
-	pisvc "github.com/grafvonb/camunder/internal/services/processinstance"
+	"github.com/grafvonb/kamunder/config"
+	csvc "github.com/grafvonb/kamunder/internal/services/cluster"
+	pdsvc "github.com/grafvonb/kamunder/internal/services/processdefinition"
+	pisvc "github.com/grafvonb/kamunder/internal/services/processinstance"
 
-	"github.com/grafvonb/camunder/kamunder/cluster"
-	"github.com/grafvonb/camunder/kamunder/process"
-	"github.com/grafvonb/camunder/kamunder/task"
+	"github.com/grafvonb/kamunder/kamunder/cluster"
+	"github.com/grafvonb/kamunder/kamunder/process"
+	"github.com/grafvonb/kamunder/kamunder/task"
 )
 
 type Option func(*cfg)

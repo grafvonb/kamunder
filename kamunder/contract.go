@@ -3,9 +3,9 @@ package kamunder
 import (
 	"context"
 
-	"github.com/grafvonb/camunder/kamunder/cluster"
-	"github.com/grafvonb/camunder/kamunder/process"
-	"github.com/grafvonb/camunder/kamunder/task"
+	"github.com/grafvonb/kamunder/kamunder/cluster"
+	"github.com/grafvonb/kamunder/kamunder/process"
+	"github.com/grafvonb/kamunder/kamunder/task"
 )
 
 type API interface {

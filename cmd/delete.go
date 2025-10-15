@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"strings"
 
-	d "github.com/grafvonb/camunder/internal/domain"
-	"github.com/grafvonb/camunder/internal/services/processinstance"
-	"github.com/grafvonb/camunder/toolx/logging"
+	d "github.com/grafvonb/kamunder/internal/domain"
+	"github.com/grafvonb/kamunder/internal/services/processinstance"
+	"github.com/grafvonb/kamunder/toolx/logging"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )

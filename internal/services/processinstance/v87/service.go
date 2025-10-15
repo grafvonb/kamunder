@@ -8,13 +8,13 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/grafvonb/camunder/config"
-	camundav87 "github.com/grafvonb/camunder/internal/clients/camunda/v87/camunda"
-	operatev87 "github.com/grafvonb/camunder/internal/clients/camunda/v87/operate"
-	d "github.com/grafvonb/camunder/internal/domain"
-	"github.com/grafvonb/camunder/internal/services/httpc"
-	"github.com/grafvonb/camunder/internal/services/processinstance/state"
-	"github.com/grafvonb/camunder/toolx"
+	"github.com/grafvonb/kamunder/config"
+	camundav87 "github.com/grafvonb/kamunder/internal/clients/camunda/v87/camunda"
+	operatev87 "github.com/grafvonb/kamunder/internal/clients/camunda/v87/operate"
+	d "github.com/grafvonb/kamunder/internal/domain"
+	"github.com/grafvonb/kamunder/internal/services/httpc"
+	"github.com/grafvonb/kamunder/internal/services/processinstance/state"
+	"github.com/grafvonb/kamunder/toolx"
 )
 
 const wrongStateMessage400 = "Process instances needs to be in one of the states [COMPLETED, CANCELED]"

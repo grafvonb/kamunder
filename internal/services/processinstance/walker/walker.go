@@ -4,9 +4,9 @@ import (
 	"context"
 	"fmt"
 
-	d "github.com/grafvonb/camunder/internal/domain"
-	"github.com/grafvonb/camunder/internal/services"
-	"github.com/grafvonb/camunder/internal/services/processinstance"
+	d "github.com/grafvonb/kamunder/internal/domain"
+	"github.com/grafvonb/kamunder/internal/services"
+	"github.com/grafvonb/kamunder/internal/services/processinstance"
 )
 
 func Ancestry(ctx context.Context, s processinstance.API, startKey int64) (rootKey int64, path []int64, chain map[int64]d.ProcessInstance, err error) {

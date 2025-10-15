@@ -1,4 +1,4 @@
-BINARY := camunder
+BINARY := kamunder
 BIN_DIR := bin
 PKG := ./...
 COVER_DIR := .coverage

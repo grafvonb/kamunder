@@ -5,11 +5,11 @@ import (
 	"log/slog"
 	"net/http"
 
-	"github.com/grafvonb/camunder/config"
-	camundav88 "github.com/grafvonb/camunder/internal/clients/camunda/v88/camunda"
-	operatev88 "github.com/grafvonb/camunder/internal/clients/camunda/v88/operate"
-	d "github.com/grafvonb/camunder/internal/domain"
-	"github.com/grafvonb/camunder/internal/services/processinstance/state"
+	"github.com/grafvonb/kamunder/config"
+	camundav88 "github.com/grafvonb/kamunder/internal/clients/camunda/v88/camunda"
+	operatev88 "github.com/grafvonb/kamunder/internal/clients/camunda/v88/operate"
+	d "github.com/grafvonb/kamunder/internal/domain"
+	"github.com/grafvonb/kamunder/internal/services/processinstance/state"
 )
 
 // nolint
