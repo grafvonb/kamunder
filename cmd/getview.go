@@ -34,7 +34,7 @@ func processInstanceView(cmd *cobra.Command, item process.ProcessInstance) error
 	if flagOneLine {
 		return oneLineProcessInstanceView(cmd, item)
 	}
-	if flagKeysOnly {
+	if flagPDKeysOnly {
 		return keyOnlyProcessInstanceView(cmd, item)
 	}
 	cmd.Println(ToJSONString(item))
@@ -89,7 +89,7 @@ func processDefinitionView(cmd *cobra.Command, item process.ProcessDefinition) e
 	if flagOneLine {
 		return oneLineProcessDefinitionView(cmd, item)
 	}
-	if flagKeysOnly {
+	if flagPDKeysOnly {
 		return keyOnlyProcessDefinitionView(cmd, item)
 	}
 	cmd.Println(ToJSONString(item))
@@ -178,25 +178,25 @@ func printFoundV[T any](cmd *cobra.Command, items []T) {
 
 func printFilter(cmd *cobra.Command) {
 	var filters []string
-	if flagParentKey != 0 {
-		filters = append(filters, fmt.Sprintf("parent-key=%d", flagParentKey))
+	if flagPIParentKey != 0 {
+		filters = append(filters, fmt.Sprintf("parent-key=%d", flagPIParentKey))
 	}
-	if flagState != "" && flagState != "all" {
-		filters = append(filters, fmt.Sprintf("state=%s", flagState))
+	if flagPIState != "" && flagPIState != "all" {
+		filters = append(filters, fmt.Sprintf("state=%s", flagPIState))
 	}
-	if flagParentsOnly {
+	if flagPIParentsOnly {
 		filters = append(filters, "parents-only=true")
 	}
-	if flagChildrenOnly {
+	if flagPIChildrenOnly {
 		filters = append(filters, "children-only=true")
 	}
-	if flagOrphanParentsOnly {
+	if flagPIOrphanParentsOnly {
 		filters = append(filters, "orphan-parents-only=true")
 	}
-	if flagIncidentsOnly {
+	if flagPIIncidentsOnly {
 		filters = append(filters, "incidents-only=true")
 	}
-	if flagNoIncidentsOnly {
+	if flagPINoIncidentsOnly {
 		filters = append(filters, "no-incidents-only=true")
 	}
 	if len(filters) > 0 {

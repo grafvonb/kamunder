@@ -47,7 +47,7 @@ var expectCmd = &cobra.Command{
 				return
 			}
 
-			st, err := d.ParseState(flagState)
+			st, err := d.ParseState(flagPIState)
 			if err == nil && st != d.StateAll {
 				log.Info(fmt.Sprintf("waiting for process instance %d to reach state %q", flagExpectKey, st))
 				err = state.WaitForProcessInstanceState(cmd.Context(), svc, svcs.Config, log, flagExpectKey, st)
@@ -57,7 +57,7 @@ var expectCmd = &cobra.Command{
 				}
 			}
 		default:
-			log.Error(fmt.Sprintf("unknown resource type %q, supported: %s", rn, supportedResourcesForGet))
+			log.Error(fmt.Sprintf("unknown resource type %q", rn))
 		}
 	},
 }
@@ -70,5 +70,5 @@ func init() {
 	expectCmd.Flags().Int64VarP(&flagExpectKey, "key", "k", 0, "resource key (e.g. process instance)")
 	_ = expectCmd.MarkFlagRequired("key")
 
-	expectCmd.Flags().StringVarP(&flagState, "state", "s", "", "state of a process instance: active, completed, canceled or absent")
+	expectCmd.Flags().StringVarP(&flagPIState, "state", "s", "", "state of a process instance: active, completed, canceled or absent")
 }

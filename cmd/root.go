@@ -18,6 +18,8 @@ import (
 
 var (
 	flagShowConfig bool
+	//nolint:unused,deadcode
+	flagAsJson bool
 )
 
 var rootCmd = &cobra.Command{

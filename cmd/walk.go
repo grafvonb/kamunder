@@ -76,7 +76,7 @@ var walkCmd = &cobra.Command{
 			default:
 				return
 			}
-			if flagKeysOnly {
+			if flagPDKeysOnly {
 				cmd.Println(path.KeysOnly(chain))
 				return
 			}
@@ -97,5 +97,5 @@ func init() {
 	_ = walkCmd.MarkFlagRequired("mode")
 
 	// view options
-	fs.BoolVarP(&flagKeysOnly, "keys-only", "", false, "only print the keys of the resources")
+	fs.BoolVarP(&flagPDKeysOnly, "keys-only", "", false, "only print the keys of the resources")
 }
