@@ -16,6 +16,7 @@ type API interface {
 	CancelProcessInstance(ctx context.Context, key int64) (d.CancelResponse, error)
 	DeleteProcessInstance(ctx context.Context, key int64) (d.ChangeStatus, error)
 	DeleteProcessInstanceWithCancel(ctx context.Context, key int64) (d.ChangeStatus, error)
+	GetProcessInstanceStateByKey(ctx context.Context, key int64) (d.State, error)
 	WaitForProcessInstanceState(ctx context.Context, key int64, state d.State) error
 }
 

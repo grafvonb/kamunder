@@ -47,8 +47,8 @@ var expectCmd = &cobra.Command{
 				return
 			}
 
-			st, err := d.ParseState(flagPIState)
-			if err == nil && st != d.StateAll {
+			st, ok := d.ParseState(flagPIState)
+			if ok && st != d.StateAll {
 				log.Info(fmt.Sprintf("waiting for process instance %d to reach state %q", flagExpectKey, st))
 				err = state.WaitForProcessInstanceState(cmd.Context(), svc, svcs.Config, log, flagExpectKey, st)
 				if err != nil {

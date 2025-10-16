@@ -96,6 +96,7 @@ func (s *Service) FilterProcessInstanceWithOrphanParent(ctx context.Context, ite
 }
 
 func (s *Service) SearchForProcessInstances(ctx context.Context, filter d.ProcessInstanceSearchFilterOpts, size int32) ([]d.ProcessInstance, error) {
+	s.log.Debug(fmt.Sprintf("searching for process instances with filter: %+v", filter))
 	st := operatev87.ProcessInstanceState(filter.State)
 	f := operatev87.ProcessInstance{
 		TenantId:          &s.cfg.App.Tenant,
@@ -124,20 +125,50 @@ func (s *Service) SearchForProcessInstances(ctx context.Context, filter d.Proces
 }
 
 func (s *Service) CancelProcessInstance(ctx context.Context, key int64) (d.CancelResponse, error) {
-	s.log.Debug(fmt.Sprintf("trying to cancel process instance with key %d...", key))
+	s.log.Debug(fmt.Sprintf("checking if process instance with key %d is in allowable state to cancel", key))
+	st, err := s.GetProcessInstanceStateByKey(ctx, key)
+	if err != nil {
+		return d.CancelResponse{}, err
+	}
+	if st.IsTerminal() {
+		s.log.Info(fmt.Sprintf("process instance with key %d is already in state %s, no need to cancel", key, st))
+		return d.CancelResponse{
+			StatusCode: http.StatusOK,
+			Status:     fmt.Sprintf("process instance with key %d is already in state %s, no need to cancel", key, st),
+		}, nil
+	}
+	s.log.Debug(fmt.Sprintf("cancelling process instance with key %d", key))
 	resp, err := s.cc.PostProcessInstancesProcessInstanceKeyCancellationWithResponse(ctx, strconv.Itoa(int(key)),
 		camundav87.PostProcessInstancesProcessInstanceKeyCancellationJSONRequestBody{})
 	if err != nil {
 		return d.CancelResponse{}, err
 	}
-	if resp.StatusCode() != http.StatusNoContent {
-		return d.CancelResponse{}, fmt.Errorf("unexpected status %d: %s", resp.StatusCode(), string(resp.Body))
+	if err = httpc.HttpStatusErr(resp.HTTPResponse, resp.Body); err != nil {
+		return d.CancelResponse{}, err
 	}
 	s.log.Info(fmt.Sprintf("process instance with key %d was successfully cancelled", key))
 	return d.CancelResponse{
 		StatusCode: resp.StatusCode(),
 		Status:     resp.Status(),
 	}, nil
+}
+
+func (s *Service) GetProcessInstanceStateByKey(ctx context.Context, key int64) (d.State, error) {
+	s.log.Debug(fmt.Sprintf("checking state of process instance with key %d", key))
+	pi, err := s.oc.GetProcessInstanceByKeyWithResponse(ctx, key)
+	if err != nil {
+		return "", fmt.Errorf("fetching process instance with key %d: %w", key, err)
+	}
+	if err = httpc.HttpStatusErr(pi.HTTPResponse, pi.Body); err != nil {
+		return "", fmt.Errorf("fetching process instance with key %d: %w", key, err)
+	}
+	if pi.JSON200 == nil {
+		return "", fmt.Errorf("%w: 200 OK but empty payload; body=%s",
+			d.ErrMalformedResponse, string(pi.Body))
+	}
+	st := d.State(*pi.JSON200.State)
+	s.log.Debug(fmt.Sprintf("process instance with key %d is in state %s", key, st))
+	return st, nil
 }
 
 func (s *Service) DeleteProcessInstance(ctx context.Context, key int64) (d.ChangeStatus, error) {
