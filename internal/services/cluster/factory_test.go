@@ -6,14 +6,14 @@ import (
 
 	"log/slog"
 
-	config2 "github.com/grafvonb/kamunder/config"
+	"github.com/grafvonb/kamunder/config"
 	"github.com/grafvonb/kamunder/toolx"
 	"github.com/stretchr/testify/require"
 )
 
-func testConfig() *config2.Config {
-	return &config2.Config{
-		APIs: config2.APIs{},
+func testConfig() *config.Config {
+	return &config.Config{
+		APIs: config.APIs{},
 	}
 }
 

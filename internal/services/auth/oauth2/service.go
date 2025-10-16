@@ -16,6 +16,7 @@ import (
 	"github.com/grafvonb/kamunder/internal/clients/auth/oauth2"
 	"github.com/grafvonb/kamunder/internal/services/auth/authenticator"
 	"github.com/grafvonb/kamunder/internal/services/common"
+	"github.com/grafvonb/kamunder/internal/services/httpc"
 )
 
 type TargetResolver func(*http.Request) string
@@ -50,7 +51,10 @@ func WithAuthHeader(name, prefix string) Option {
 
 func New(cfg *config.Config, apiHTTP *http.Client, log *slog.Logger, opts ...Option) (*Service, error) {
 	if cfg == nil {
-		return nil, errors.New("cfg is nil")
+		return nil, errors.New("cfg must not be nil")
+	}
+	if log == nil {
+		return nil, errors.New("logger must not be nil")
 	}
 	if apiHTTP == nil {
 		apiHTTP = http.DefaultClient
@@ -61,7 +65,7 @@ func New(cfg *config.Config, apiHTTP *http.Client, log *slog.Logger, opts ...Opt
 	if err != nil {
 		return nil, fmt.Errorf("parse token url: %w", err)
 	}
-	tokenHTTP := &http.Client{Timeout: apiHTTP.Timeout} // no wrapped Transport, no Jar
+	tokenHTTP := &http.Client{Timeout: apiHTTP.Timeout, Transport: &httpc.LogTransport{Log: log}}
 
 	cfg.APIs.Operate.BaseURL = common.DefaultVal(cfg.APIs.Operate.BaseURL, cfg.APIs.Camunda.BaseURL)
 	cfg.APIs.Tasklist.BaseURL = common.DefaultVal(cfg.APIs.Tasklist.BaseURL, cfg.APIs.Camunda.BaseURL)
@@ -127,6 +131,7 @@ func (s *Service) RetrieveTokenForAPI(ctx context.Context, target string) (strin
 	if s == nil {
 		return "", errors.New("oauth2 service is nil (not wired)")
 	}
+	s.log.Debug(fmt.Sprintf("fetching bearer token for target: %s", target))
 	s.mu.Lock()
 	if tok, ok := s.cache[target]; ok && tok != "" {
 		s.mu.Unlock()

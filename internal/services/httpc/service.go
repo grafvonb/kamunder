@@ -58,7 +58,7 @@ func New(cfg *config.Config, log *slog.Logger, opts ...Option) (*Service, error)
 	if err != nil {
 		return nil, err
 	}
-	httpClient := &http.Client{Timeout: d, Transport: &logTransport{log: log}}
+	httpClient := &http.Client{Timeout: d, Transport: &LogTransport{Log: log}}
 	s := &Service{c: httpClient, cfg: cfg, log: log}
 	for _, opt := range opts {
 		opt(s)
@@ -83,48 +83,7 @@ func (s *Service) InstallCookieJar() error {
 }
 
 func (s *Service) InstallAuthEditor(ed authenticator.RequestEditor) {
-	s.c.Transport = &authTransport{base: s.c.Transport, editor: ed}
-}
-
-type authTransport struct {
-	base   http.RoundTripper
-	editor authenticator.RequestEditor
-}
-
-func (t *authTransport) rt() http.RoundTripper {
-	if t.base != nil {
-		return t.base
-	}
-	return http.DefaultTransport
-}
-
-func (t *authTransport) RoundTrip(req *http.Request) (*http.Response, error) {
-	if t.editor != nil {
-		if err := t.editor(req.Context(), req); err != nil {
-			return nil, err
-		}
-	}
-	return t.rt().RoundTrip(req)
-}
-
-type logTransport struct {
-	base http.RoundTripper
-	log  *slog.Logger
-}
-
-func (t *logTransport) rt() http.RoundTripper {
-	if t.base != nil {
-		return t.base
-	}
-	if t.log == nil {
-		t.log = slog.Default()
-	}
-	return http.DefaultTransport
-}
-
-func (t *logTransport) RoundTrip(req *http.Request) (*http.Response, error) {
-	t.log.Debug("calling: " + req.URL.String())
-	return t.rt().RoundTrip(req)
+	s.c.Transport = &AuthTransport{base: s.c.Transport, Editor: ed}
 }
 
 type ctxKey struct{}

@@ -18,7 +18,7 @@ import (
 
 var (
 	flagShowConfig bool
-	//nolint:unused,deadcode
+	//nolint:unused
 	flagAsJson bool
 )
 

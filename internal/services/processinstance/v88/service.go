@@ -58,7 +58,12 @@ func (s Service) DeleteProcessInstanceWithCancel(ctx context.Context, key int64)
 type Option func(*Service)
 
 func New(cfg *config.Config, httpClient *http.Client, log *slog.Logger, opts ...Option) (*Service, error) {
-	panic("not implemented in v88")
+	return &Service{
+		cc:  &camundav88.ClientWithResponses{},
+		oc:  &operatev88.ClientWithResponses{},
+		cfg: &config.Config{},
+		log: &slog.Logger{},
+	}, nil
 }
 
 func (s *Service) WaitForProcessInstanceState(ctx context.Context, key int64, st d.State) error {

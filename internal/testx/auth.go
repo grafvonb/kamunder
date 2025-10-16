@@ -2,6 +2,7 @@ package testx
 
 import (
 	"net/http"
+	"testing"
 
 	"github.com/grafvonb/kamunder/config"
 	"github.com/grafvonb/kamunder/internal/clients/auth/oauth2"
@@ -16,7 +17,8 @@ type tokenJSON200 = struct {
 	TokenType    string  `json:"token_type"`
 }
 
-func TestAuthJSON200Response(status int, token string, raw string) *oauth2.RequestTokenResponse {
+func TestAuthJSON200Response(t *testing.T, status int, token string, raw string) *oauth2.RequestTokenResponse {
+	t.Helper()
 	return &oauth2.RequestTokenResponse{
 		Body: []byte(raw),
 		JSON200: &tokenJSON200{
@@ -27,7 +29,8 @@ func TestAuthJSON200Response(status int, token string, raw string) *oauth2.Reque
 	}
 }
 
-func TestConfig() *config.Config {
+func TestConfig(t *testing.T) *config.Config {
+	t.Helper()
 	return &config.Config{
 		App: config.App{
 			Tenant: "tenant",

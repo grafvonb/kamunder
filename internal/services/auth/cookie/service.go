@@ -68,6 +68,7 @@ func (s *Service) Init(ctx context.Context) error {
 		return nil
 	}
 
+	s.log.Debug(fmt.Sprintf("initializing session cookie auth at %s", s.baseURL.Host))
 	loginURL := *s.baseURL
 	loginURL.Path = strings.TrimRight(loginURL.Path, "/") + "/api/login"
 
