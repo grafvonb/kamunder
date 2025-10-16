@@ -7,7 +7,7 @@ import (
 	"testing"
 )
 
-const EnvCamunderTestPrefix = "CAMUNDER_TEST_"
+const EnvKamunderTestPrefix = "KAMUNDER_TEST_"
 
 func RequireEnv(t testing.TB, key string) string {
 	t.Helper()
@@ -29,7 +29,7 @@ func RequireEnvs(t testing.TB, keys ...string) map[string]string {
 
 func RequireEnvWithPrefix(t testing.TB, key string) string {
 	t.Helper()
-	return RequireEnv(t, EnvCamunderTestPrefix+key)
+	return RequireEnv(t, EnvKamunderTestPrefix+key)
 }
 func RequireEnvsWithPrefix(t testing.TB, keys ...string) map[string]string {
 	t.Helper()
@@ -39,7 +39,7 @@ func RequireEnvsWithPrefix(t testing.TB, keys ...string) map[string]string {
 	}
 	return out
 }
-func GetEnvWithPrefix(key string) string { return os.Getenv(EnvCamunderTestPrefix + key) }
+func GetEnvWithPrefix(key string) string { return os.Getenv(EnvKamunderTestPrefix + key) }
 
 func RequireEnvRaw(t testing.TB, key string) string { return RequireEnv(t, key) }
 func GetEnvRaw(key string) string                   { return os.Getenv(key) }

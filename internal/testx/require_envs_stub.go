@@ -4,8 +4,6 @@ package testx
 
 import "testing"
 
-const EnvCamunderTestPrefix = "CAMUNDER_TEST_"
-
 func RequireEnv(t testing.TB, key string) string {
 	t.Helper()
 	t.Skip("integration-only helper; build with -tags=integration")

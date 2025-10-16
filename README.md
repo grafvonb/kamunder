@@ -1,3 +1,7 @@
+<p align="center">
+<img src="./docs/logo/kamunder_bkg_white_900x300.png" alt="kamunder logo" style="border-radius: 5px;" height="150px" />
+</p>
+
 # Kamunder – a CLI for Camunda 8.x
 
 **Kamunder** is a CLI (command-line interface) for Camunda 8 that gives developers and operators faster, scriptable management of Camunda resources.
@@ -166,7 +170,7 @@ Kamunder simplifies various tasks related to Camunda 8, including these special 
 ## Supported Camunda 8 APIs
 
 - 8.7.x
-- 8.8.x (to come after release in October 2025)
+- 8.8.x
 
 ## Configuration
 
@@ -192,7 +196,7 @@ auth:
   oauth2:
     token_url: "http://localhost:18080/auth/realms/camunda-platform/protocol/openid-connect"
     client_id: "kamunder"
-    client_secret: "*******" # use environment variable CAMUNDER_AUTH_CLIENT_SECRET if possible
+    client_secret: "*******" # use environment variable KAMUNDER_AUTH_CLIENT_SECRET if possible
     scopes:
       camunda_api: "profile"
       operate_api: "profile"
@@ -251,7 +255,7 @@ Kamunder uses [Viper](https://github.com/spf13/viper) under the hood.
 Configuration values can come from:
 
 -   **Flags** (`--auth-client-id=...`)
--   **Environment variables** (`CAMUNDER_AUTH_CLIENT_ID=...`)
+-   **Environment variables** (`KAMUNDER_AUTH_CLIENT_ID=...`)
 -   **Config file** (YAML)
 -   **Defaults** (hardcoded fallbacks)
 
@@ -262,7 +266,7 @@ When multiple sources define the same setting, the **highest-priority value wins
 | Priority    | Source             | Example                          |
 |-------------|--------------------|----------------------------------|
 | 1 (highest) | Command-line flags | `--auth-client-id=cli-id`        |
-| 2           | Environment vars   | `CAMUNDER_AUTH_CLIENT_ID=env-id` |
+| 2           | Environment vars   | `KAMUNDER_AUTH_CLIENT_ID=env-id` |
 | 3           | Config file (YAML) | `auth.client_id: file-id`        |
 | 4 (lowest)  | Defaults           | `http.timeout: "30s"` (built-in) |
 
@@ -324,12 +328,12 @@ apis:
 ### Environment variables
 
 Each config key can also be set via environment variable.\
-The prefix is `CAMUNDER_`, and nested keys are joined with `_`. For
+The prefix is `KAMUNDER_`, and nested keys are joined with `_`. For
 example:
 
--   `CAMUNDER_AUTH_CLIENT_ID`
--   `CAMUNDER_AUTH_CLIENT_SECRET`
--   `CAMUNDER_HTTP_TIMEOUT`
+-   `KAMUNDER_AUTH_CLIENT_ID`
+-   `KAMUNDER_AUTH_CLIENT_SECRET`
+-   `KAMUNDER_HTTP_TIMEOUT`
 
 ### Security note
 
@@ -398,45 +402,6 @@ config loaded: /Users/adam.boczek/Development/Workspace/Boczek/Projects/kamunder
 }
 ```
 
-## Usage Help
-```bash
-$ ./kamunder help
-Kamunder is a CLI tool to interact with Camunda 8.
-
-Usage:
-  kamunder [flags]
-  kamunder [command]
-
-Available Commands:
-  cancel      Cancel a resource of a given type by its key. Supported resource types are: process-instance (pi)
-  completion  Generate the autocompletion script for the specified shell
-  delete      Delete a resource of a given type by its key. Supported resource types are: process-instance (pi)
-  expect      Expect a resource of a given type to change (e.g. its state) by its key. Supported resource types are: process-instance (pi)
-  get         List resources of a resource type. Supported resource types are: cluster-topology (ct), process-definition (pd), process-instance (pi)
-  help        Help about any command
-  version     Print version information
-  walk        Traverse (walk) the parent/child graph of resource type. Supported resource types are: process-instance (pi)
-
-Flags:
-      --auth-client-id string         auth client ID
-      --auth-client-secret string     auth client secret
-      --auth-scopes stringToString    auth scopes as key=value (repeatable or comma-separated) (default [])
-      --auth-token-url string         auth token URL
-  -a, --camunda-apis-version string   Camunda API version (supported: [8.7 8.8]) (default "8.7")
-      --camunda-base-url string       Camunda API base URL
-      --config string                 path to config file
-  -h, --help                          help for kamunder
-      --http-timeout string           HTTP timeout (Go duration, e.g. 30s)
-      --log-format string             log format (json, plain, text) (default "plain")
-      --log-level string              log level (debug, info, warn, error) (default "info")
-      --log-with-source               include source file and line number in logs
-      --operate-base-url string       Operate API base URL
-      --show-config                   print effective config (secrets redacted)
-      --tasklist-base-url string      Tasklist API base URL
-      --tenant string                 default tenant ID
-
-Use "kamunder [command] --help" for more information about a command.
-```
 
 ### Kamunder in Action
 Look here for practical examples of using Kamunder for common tasks and special use cases.
