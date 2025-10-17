@@ -4,6 +4,7 @@ import (
 	"context"
 
 	d "github.com/grafvonb/kamunder/internal/domain"
+	"github.com/grafvonb/kamunder/internal/services"
 	v87 "github.com/grafvonb/kamunder/internal/services/processinstance/v87"
 	v88 "github.com/grafvonb/kamunder/internal/services/processinstance/v88"
 )
@@ -13,7 +14,7 @@ type API interface {
 	GetDirectChildrenOfProcessInstance(ctx context.Context, key int64) ([]d.ProcessInstance, error)
 	FilterProcessInstanceWithOrphanParent(ctx context.Context, items []d.ProcessInstance) ([]d.ProcessInstance, error)
 	SearchForProcessInstances(ctx context.Context, filter d.ProcessInstanceSearchFilterOpts, size int32) ([]d.ProcessInstance, error)
-	CancelProcessInstance(ctx context.Context, key int64) (d.CancelResponse, error)
+	CancelProcessInstance(ctx context.Context, key int64, opts ...services.CallOption) (d.CancelResponse, error)
 	DeleteProcessInstance(ctx context.Context, key int64) (d.ChangeStatus, error)
 	DeleteProcessInstanceWithCancel(ctx context.Context, key int64) (d.ChangeStatus, error)
 	GetProcessInstanceStateByKey(ctx context.Context, key int64) (d.State, error)

@@ -6,6 +6,7 @@ import (
 	d "github.com/grafvonb/kamunder/internal/domain"
 	pdsvc "github.com/grafvonb/kamunder/internal/services/processdefinition"
 	pisvc "github.com/grafvonb/kamunder/internal/services/processinstance"
+	"github.com/grafvonb/kamunder/kamunder/options"
 	"github.com/grafvonb/kamunder/toolx"
 )
 
@@ -15,7 +16,7 @@ type API interface {
 
 	GetProcessInstanceByKey(ctx context.Context, key int64) (ProcessInstance, error)
 	SearchForProcessInstances(ctx context.Context, filter ProcessInstanceSearchFilterOpts, size int32) (ProcessInstances, error)
-	CancelProcessInstance(ctx context.Context, key int64) (CancelResponse, error)
+	CancelProcessInstance(ctx context.Context, key int64, option ...options.FacadeOption) (CancelResponse, error)
 	GetDirectChildrenOfProcessInstance(ctx context.Context, key int64) (ProcessInstances, error)
 	FilterProcessInstanceWithOrphanParent(ctx context.Context, items []ProcessInstance) ([]ProcessInstance, error)
 	DeleteProcessInstance(ctx context.Context, key int64) (ChangeStatus, error)
@@ -67,8 +68,8 @@ func (c *client) SearchForProcessInstances(ctx context.Context, filter ProcessIn
 	return fromDomainProcessInstances(pis), nil
 }
 
-func (c *client) CancelProcessInstance(ctx context.Context, key int64) (CancelResponse, error) {
-	resp, err := c.piApi.CancelProcessInstance(ctx, key)
+func (c *client) CancelProcessInstance(ctx context.Context, key int64, opts ...options.FacadeOption) (CancelResponse, error) {
+	resp, err := c.piApi.CancelProcessInstance(ctx, key, options.MapFacadeOptionsToCallOptions(opts)...)
 	if err != nil {
 		return CancelResponse{}, err
 	}

@@ -38,7 +38,7 @@ var (
 var getProcessInstanceCmd = &cobra.Command{
 	Use:     "process-instance",
 	Short:   "Get process instances.",
-	Aliases: []string{"pi"},
+	Aliases: []string{"process-instances", "pi", "pis"},
 	Run: func(cmd *cobra.Command, args []string) {
 		log := logging.FromContext(cmd.Context())
 		svcs, err := NewFromContext(cmd.Context())

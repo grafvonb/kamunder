@@ -11,6 +11,7 @@ import (
 	camundav88 "github.com/grafvonb/kamunder/internal/clients/camunda/v88/camunda"
 	operatev88 "github.com/grafvonb/kamunder/internal/clients/camunda/v88/operate"
 	d "github.com/grafvonb/kamunder/internal/domain"
+	"github.com/grafvonb/kamunder/internal/services"
 	"github.com/grafvonb/kamunder/internal/services/httpc"
 	"github.com/grafvonb/kamunder/internal/services/processinstance/state"
 	"github.com/grafvonb/kamunder/toolx"
@@ -87,19 +88,26 @@ func (s *Service) SearchForProcessInstances(ctx context.Context, filter d.Proces
 	return toolx.DerefSlicePtr(resp.JSON200.Items, fromProcessInstanceResponse), nil
 }
 
-func (s *Service) CancelProcessInstance(ctx context.Context, key int64) (d.CancelResponse, error) {
-	s.log.Debug(fmt.Sprintf("checking if process instance with key %d is in allowable state to cancel", key))
-	st, err := s.GetProcessInstanceStateByKey(ctx, key)
-	if err != nil {
-		return d.CancelResponse{}, err
+func (s *Service) CancelProcessInstance(ctx context.Context, key int64, opts ...services.CallOption) (d.CancelResponse, error) {
+	cCfg := services.ApplyCallOptions(opts)
+
+	if !cCfg.NoStateCheck {
+		s.log.Debug(fmt.Sprintf("checking if process instance with key %d is in allowable state to cancel", key))
+		st, err := s.GetProcessInstanceStateByKey(ctx, key)
+		if err != nil {
+			return d.CancelResponse{}, err
+		}
+		if st.IsTerminal() {
+			s.log.Info(fmt.Sprintf("process instance with key %d is already in state %s, no need to cancel", key, st))
+			return d.CancelResponse{
+				StatusCode: http.StatusOK,
+				Status:     fmt.Sprintf("process instance with key %d is already in state %s, no need to cancel", key, st),
+			}, nil
+		}
+	} else {
+		s.log.Debug("skipping process instance state check before cancellation as per call options")
 	}
-	if st.IsTerminal() {
-		s.log.Info(fmt.Sprintf("process instance with key %d is already in state %s, no need to cancel", key, st))
-		return d.CancelResponse{
-			StatusCode: http.StatusOK,
-			Status:     fmt.Sprintf("process instance with key %d is already in state %s, no need to cancel", key, st),
-		}, nil
-	}
+
 	s.log.Debug(fmt.Sprintf("cancelling process instance with key %d", key))
 	resp, err := s.cc.CancelProcessInstanceWithResponse(ctx, strconv.FormatInt(key, 10), camundav88.CancelProcessInstanceJSONRequestBody{})
 	if err != nil {
