@@ -15,6 +15,7 @@ var getCmd = &cobra.Command{
 	RunE: func(cmd *cobra.Command, args []string) error {
 		return cmd.Help()
 	},
+	SuggestFor: []string{"gett", "getr"},
 }
 
 func init() {

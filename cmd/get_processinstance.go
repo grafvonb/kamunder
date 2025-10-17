@@ -160,8 +160,7 @@ func populatePISearchFilterOpts() process.ProcessInstanceSearchFilterOpts {
 		filter.ProcessVersionTag = flagPIProcessVersionTag
 	}
 	if flagPIState != "" && flagPIState != "all" {
-		state, err := process.ParseState(flagPIState)
-		if err == nil {
+		if state, ok := process.ParseState(flagPIState); ok {
 			filter.State = state
 		}
 	}

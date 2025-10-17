@@ -46,6 +46,7 @@ func AddBackoffFlagsAndBindings(cmd *cobra.Command, v *viper.Viper) {
 	v.SetDefault("app.backoff.timeout", defaultBackoffTimeout)
 }
 
+//nolint:unused
 func requireAnyFlag(cmd *cobra.Command, flags ...string) error {
 	for _, f := range flags {
 		if cmd.Flags().Changed(f) {
