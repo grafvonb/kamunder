@@ -17,7 +17,7 @@ var supportedResourcesForExpect = ResourceTypes{
 }
 
 var (
-	flagExpectKey int64
+	flagExpectKey string
 )
 
 // expectCmd represents the cancel command
@@ -49,7 +49,7 @@ var expectCmd = &cobra.Command{
 
 			st, ok := d.ParseState(flagPIState)
 			if ok && st != d.StateAll {
-				log.Info(fmt.Sprintf("waiting for process instance %d to reach state %q", flagExpectKey, st))
+				log.Info(fmt.Sprintf("waiting for process instance %s to reach state %q", flagExpectKey, st))
 				err = state.WaitForProcessInstanceState(cmd.Context(), svc, svcs.Config, log, flagExpectKey, st)
 				if err != nil {
 					log.Error(fmt.Sprintf("error waiting for a process instance to reach a %q state: %v", st, err))
@@ -67,7 +67,7 @@ func init() {
 
 	AddBackoffFlagsAndBindings(expectCmd, viper.GetViper())
 
-	expectCmd.Flags().Int64VarP(&flagExpectKey, "key", "k", 0, "resource key (e.g. process instance)")
+	expectCmd.Flags().StringVarP(&flagExpectKey, "key", "k", "", "resource key (e.g. process instance)")
 	_ = expectCmd.MarkFlagRequired("key")
 
 	expectCmd.Flags().StringVarP(&flagPIState, "state", "s", "", "state of a process instance: active, completed, canceled or absent")

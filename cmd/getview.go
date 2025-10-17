@@ -43,8 +43,8 @@ func processInstanceView(cmd *cobra.Command, item process.ProcessInstance) error
 
 func oneLineProcessInstanceView(cmd *cobra.Command, item process.ProcessInstance) error {
 	var pTag, eTag, vTag string
-	if item.ParentKey > 0 {
-		pTag = fmt.Sprintf(" p:%d", item.ParentKey)
+	if item.ParentKey != "" {
+		pTag = fmt.Sprintf(" p:%s", item.ParentKey)
 	} else {
 		pTag = " p:<root>"
 	}
@@ -56,7 +56,7 @@ func oneLineProcessInstanceView(cmd *cobra.Command, item process.ProcessInstance
 	}
 
 	out := fmt.Sprintf(
-		"%-16d %s %s v%d%s %s s:%s%s%s i:%t",
+		"%-16s %s %s v%d%s %s s:%s%s%s i:%t",
 		item.Key, item.TenantId, item.BpmnProcessId, item.ProcessVersion, vTag, item.State, item.StartDate, eTag, pTag, item.Incident,
 	)
 	cmd.Println(strings.TrimSpace(out))
@@ -101,7 +101,7 @@ func oneLineProcessDefinitionView(cmd *cobra.Command, item process.ProcessDefini
 	if item.VersionTag != "" {
 		vTag = "/" + item.VersionTag
 	}
-	out := fmt.Sprintf("%-16d %s %s v%s%s",
+	out := fmt.Sprintf("%-16s %s %s v%s%s",
 		item.Key, item.TenantId, item.BpmnProcessId, version, vTag,
 	)
 	cmd.Println(strings.TrimSpace(out))
@@ -178,8 +178,8 @@ func printFoundV[T any](cmd *cobra.Command, items []T) {
 
 func printFilter(cmd *cobra.Command) {
 	var filters []string
-	if flagPIParentKey != 0 {
-		filters = append(filters, fmt.Sprintf("parent-key=%d", flagPIParentKey))
+	if flagPIParentKey != "" {
+		filters = append(filters, fmt.Sprintf("parent-key=%s", flagPIParentKey))
 	}
 	if flagPIState != "" && flagPIState != "all" {
 		filters = append(filters, fmt.Sprintf("state=%s", flagPIState))

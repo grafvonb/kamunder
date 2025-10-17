@@ -9,6 +9,7 @@ import (
 	"github.com/grafvonb/kamunder/config"
 	camundav88 "github.com/grafvonb/kamunder/internal/clients/camunda/v88/camunda"
 	d "github.com/grafvonb/kamunder/internal/domain"
+	"github.com/grafvonb/kamunder/internal/services"
 	"github.com/grafvonb/kamunder/internal/services/httpc"
 )
 
@@ -37,7 +38,8 @@ func New(cfg *config.Config, httpClient *http.Client, log *slog.Logger, opts ...
 	return s, nil
 }
 
-func (s *Service) GetClusterTopology(ctx context.Context) (d.Topology, error) {
+func (s *Service) GetClusterTopology(ctx context.Context, opts ...services.CallOption) (d.Topology, error) {
+	_ = services.ApplyCallOptions(opts)
 	resp, err := s.c.GetTopologyWithResponse(ctx)
 	if err != nil {
 		return d.Topology{}, err

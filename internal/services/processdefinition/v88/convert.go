@@ -9,7 +9,7 @@ import (
 func fromProcessDefinitionResponse(r operatev88.ProcessDefinition) d.ProcessDefinition {
 	return d.ProcessDefinition{
 		BpmnProcessId: toolx.Deref(r.BpmnProcessId, ""),
-		Key:           toolx.Deref(r.Key, int64(0)),
+		Key:           toolx.Int64PtrToString(r.Key),
 		Name:          toolx.Deref(r.Name, ""),
 		TenantId:      toolx.Deref(r.TenantId, ""),
 		Version:       toolx.Deref(r.Version, int32(0)),

@@ -8,10 +8,10 @@ type ProcessInstance struct {
 	BpmnProcessId             string
 	EndDate                   string
 	Incident                  bool
-	Key                       int64
-	ParentFlowNodeInstanceKey int64
-	ParentKey                 int64
-	ProcessDefinitionKey      int64
+	Key                       string
+	ParentFlowNodeInstanceKey string
+	ParentKey                 string
+	ProcessDefinitionKey      string
 	ProcessVersion            int32
 	ProcessVersionTag         string
 	StartDate                 string
@@ -20,12 +20,12 @@ type ProcessInstance struct {
 }
 
 type ProcessInstanceSearchFilterOpts struct {
-	Key               int64
+	Key               string
 	BpmnProcessId     string
 	ProcessVersion    int32
 	ProcessVersionTag string
 	State             State
-	ParentKey         int64
+	ParentKey         string
 }
 
 type CancelResponse struct {

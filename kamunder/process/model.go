@@ -6,7 +6,7 @@ import (
 
 type ProcessDefinition struct {
 	BpmnProcessId string `json:"bpmnProcessId,omitempty"`
-	Key           int64  `json:"key,omitempty"`
+	Key           string `json:"key,omitempty"`
 	Name          string `json:"name,omitempty"`
 	TenantId      string `json:"tenantId,omitempty"`
 	Version       int32  `json:"version,omitempty"`
@@ -19,7 +19,7 @@ type ProcessDefinitions struct {
 }
 
 type ProcessDefinitionSearchFilterOpts struct {
-	Key           int64  `json:"key,omitempty"`
+	Key           string `json:"key,omitempty"`
 	BpmnProcessId string `json:"bpmnProcessId,omitempty"`
 	Version       int32  `json:"version,omitempty"`
 	VersionTag    string `json:"versionTag,omitempty"`
@@ -29,11 +29,11 @@ type ProcessInstance struct {
 	BpmnProcessId             string `json:"bpmnProcessId,omitempty"`
 	EndDate                   string `json:"endDate,omitempty"`
 	Incident                  bool   `json:"incident,omitempty"`
-	Key                       int64  `json:"key,omitempty"`
-	ParentFlowNodeInstanceKey int64  `json:"parentFlowNodeInstanceKey,omitempty"`
-	ParentKey                 int64  `json:"parentKey,omitempty"`
-	ParentProcessInstanceKey  int64  `json:"parentProcessInstanceKey,omitempty"`
-	ProcessDefinitionKey      int64  `json:"processDefinitionKey,omitempty"`
+	Key                       string `json:"key,omitempty"`
+	ParentFlowNodeInstanceKey string `json:"parentFlowNodeInstanceKey,omitempty"`
+	ParentKey                 string `json:"parentKey,omitempty"`
+	ParentProcessInstanceKey  string `json:"parentProcessInstanceKey,omitempty"`
+	ProcessDefinitionKey      string `json:"processDefinitionKey,omitempty"`
 	ProcessVersion            int32  `json:"processVersion,omitempty"`
 	ProcessVersionTag         string `json:"processVersionTag,omitempty"`
 	StartDate                 string `json:"startDate,omitempty"`
@@ -47,12 +47,12 @@ type ProcessInstances struct {
 }
 
 type ProcessInstanceSearchFilterOpts struct {
-	Key               int64
+	Key               string
 	BpmnProcessId     string
 	ProcessVersion    int32
 	ProcessVersionTag string
 	State             State
-	ParentKey         int64
+	ParentKey         string
 }
 
 type CancelResponse struct {

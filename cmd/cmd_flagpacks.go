@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/grafvonb/kamunder/kamunder/options"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -52,4 +53,15 @@ func requireAnyFlag(cmd *cobra.Command, flags ...string) error {
 		}
 	}
 	return fmt.Errorf("one of %v must be provided", flags)
+}
+
+func collectOptions() []options.FacadeOption {
+	var opts []options.FacadeOption
+	if flagCancelNoStateCheck {
+		opts = append(opts, options.WithNoStateCheck())
+	}
+	if flagDeleteWithCancel {
+		opts = append(opts, options.WithCancel())
+	}
+	return opts
 }

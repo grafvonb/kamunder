@@ -13,12 +13,12 @@ import (
 const maxPISearchSize int32 = 1000
 
 var (
-	flagPIKey               int64
+	flagPIKey               string
 	flagPIBpmnProcessID     string
 	flagPIProcessVersion    int32
 	flagPIProcessVersionTag string
 	flagPIState             string
-	flagPIParentKey         int64
+	flagPIParentKey         string
 )
 
 // command options
@@ -59,11 +59,11 @@ var getProcessInstanceCmd = &cobra.Command{
 		log.Debug("fetching process instances")
 		searchFilterOpts := populatePISearchFilterOpts()
 		printFilter(cmd)
-		if searchFilterOpts.Key > 0 {
-			log.Debug(fmt.Sprintf("searching by key: %d", searchFilterOpts.Key))
+		if searchFilterOpts.Key != "" {
+			log.Debug(fmt.Sprintf("searching by key: %s", searchFilterOpts.Key))
 			pi, err := cli.GetProcessInstanceByKey(cmd.Context(), searchFilterOpts.Key)
 			if err != nil {
-				log.Error(fmt.Sprintf("error fetching process instance by key %d: %v", searchFilterOpts.Key, err))
+				log.Error(fmt.Sprintf("error fetching process instance by key %s: %v", searchFilterOpts.Key, err))
 				return
 			}
 			err = processInstanceView(cmd, pi)
@@ -71,7 +71,7 @@ var getProcessInstanceCmd = &cobra.Command{
 				log.Error(fmt.Sprintf("error rendering key-only view: %v", err))
 				return
 			}
-			log.Debug(fmt.Sprintf("searched by key, found process instance with key: %d", pi.Key))
+			log.Debug(fmt.Sprintf("searched by key, found process instance with key: %s", pi.Key))
 		} else {
 			log.Debug(fmt.Sprintf("searching by filter: %v", searchFilterOpts))
 			pisr, err := cli.SearchForProcessInstances(cmd.Context(), searchFilterOpts, maxPISearchSize)
@@ -124,13 +124,13 @@ func init() {
 	AddBackoffFlagsAndBindings(getProcessInstanceCmd, viper.GetViper())
 
 	fs := getProcessInstanceCmd.Flags()
-	fs.Int64VarP(&flagPIKey, "key", "k", 0, "resource key (e.g. process instance) to fetch")
+	fs.StringVarP(&flagPIKey, "key", "k", "", "resource key (e.g. process instance) to fetch")
 	fs.StringVarP(&flagPIBpmnProcessID, "bpmn-process-id", "b", "", "BPMN process ID to filter process instances")
 	fs.Int32VarP(&flagPIProcessVersion, "process-version", "v", 0, "process definition version")
 	fs.StringVar(&flagPIProcessVersionTag, "process-version-tag", "", "process definition version tag")
 
 	// filtering options
-	fs.Int64Var(&flagPIParentKey, "parent-key", 0, "parent process instance key to filter process instances")
+	fs.StringVar(&flagPIParentKey, "parent-key", "", "parent process instance key to filter process instances")
 	fs.StringVarP(&flagPIState, "state", "s", "all", "state to filter process instances: all, active, completed, canceled")
 	fs.BoolVar(&flagPIParentsOnly, "parents-only", false, "show only parent process instances, meaning instances with no parent key set")
 	fs.BoolVar(&flagPIChildrenOnly, "children-only", false, "show only child process instances, meaning instances that have a parent key set")
@@ -144,10 +144,10 @@ func init() {
 
 func populatePISearchFilterOpts() process.ProcessInstanceSearchFilterOpts {
 	var filter process.ProcessInstanceSearchFilterOpts
-	if flagPIKey != 0 {
+	if flagPIKey != "" {
 		filter.Key = flagPIKey
 	}
-	if flagPIParentKey != 0 {
+	if flagPIParentKey != "" {
 		filter.ParentKey = flagPIParentKey
 	}
 	if flagPIBpmnProcessID != "" {

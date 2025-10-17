@@ -9,16 +9,19 @@ import (
 
 	"github.com/grafvonb/kamunder/config"
 	d "github.com/grafvonb/kamunder/internal/domain"
+	"github.com/grafvonb/kamunder/internal/services"
 )
 
 type PIGetter interface {
-	GetProcessInstanceByKey(ctx context.Context, key int64) (d.ProcessInstance, error)
+	GetProcessInstanceByKey(ctx context.Context, key string, opts ...services.CallOption) (d.ProcessInstance, error)
 }
 
 // WaitForProcessInstanceState waits until the instance reaches the desired state.
 // - Respects ctx cancellation/deadline; augments with cfg.Timeout if set
 // - Returns nil on success or an error on failure/timeout.
-func WaitForProcessInstanceState(ctx context.Context, s PIGetter, cfg *config.Config, log *slog.Logger, key int64, desiredState d.State) error {
+func WaitForProcessInstanceState(ctx context.Context, s PIGetter, cfg *config.Config, log *slog.Logger, key string, desiredState d.State, opts ...services.CallOption) error {
+	_ = services.ApplyCallOptions(opts)
+
 	backoff := cfg.App.Backoff
 	if backoff.Timeout > 0 {
 		deadline := time.Now().Add(backoff.Timeout)
@@ -41,13 +44,13 @@ func WaitForProcessInstanceState(ctx context.Context, s PIGetter, cfg *config.Co
 		pi, errInDelay := s.GetProcessInstanceByKey(ctx, key)
 		if errInDelay == nil {
 			if pi.State.EqualsIgnoreCase(desiredState) {
-				log.Debug(fmt.Sprintf("process instance %d reached desired state %q", key, desiredState))
+				log.Debug(fmt.Sprintf("process instance %s reached desired state %q", key, desiredState))
 				return nil
 			}
-			log.Debug(fmt.Sprintf("process instance %d currently in state %q; waiting...", key, pi.State))
+			log.Debug(fmt.Sprintf("process instance %s currently in state %q; waiting...", key, pi.State))
 		} else if errInDelay != nil {
 			if strings.Contains(errInDelay.Error(), "status 404") {
-				log.Debug(fmt.Sprintf("process instance %d is absent (not found); waiting...", key))
+				log.Debug(fmt.Sprintf("process instance %s is absent (not found); waiting...", key))
 			} else {
 				log.Error(fmt.Sprintf("fetching state for %q failed: %v (will retry)", key, errInDelay))
 			}

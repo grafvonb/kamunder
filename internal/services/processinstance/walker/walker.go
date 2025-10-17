@@ -9,35 +9,35 @@ import (
 	"github.com/grafvonb/kamunder/internal/services/processinstance"
 )
 
-func Ancestry(ctx context.Context, s processinstance.API, startKey int64) (rootKey int64, path []int64, chain map[int64]d.ProcessInstance, err error) {
+func Ancestry(ctx context.Context, s processinstance.API, startKey string) (rootKey string, path []string, chain map[string]d.ProcessInstance, err error) {
 	// visited keeps track of visited nodes to detect cycles
 	// well-know pattern to have fast lookups, no duplicates, clear semantic and low memory usage with visited[cur] = struct{}{} below
-	visited := make(map[int64]struct{})
-	chain = make(map[int64]d.ProcessInstance)
+	visited := make(map[string]struct{})
+	chain = make(map[string]d.ProcessInstance)
 
 	cur := startKey
 	for {
 		// check for context cancellation
 		select {
 		case <-ctx.Done():
-			return 0, nil, chain, ctx.Err()
+			return "", nil, chain, ctx.Err()
 		default:
 		}
 
 		if _, seen := visited[cur]; seen {
-			return 0, nil, chain, fmt.Errorf("%w for this key %d", services.ErrCycleDetected, cur)
+			return "", nil, chain, fmt.Errorf("%w for this key %s", services.ErrCycleDetected, cur)
 		}
 		visited[cur] = struct{}{}
 
 		it, getErr := s.GetProcessInstanceByKey(ctx, cur)
 		if getErr != nil {
-			return 0, nil, chain, fmt.Errorf("get %d: %w", cur, getErr)
+			return "", nil, chain, fmt.Errorf("get %s: %w", cur, getErr)
 		}
 		chain[cur] = it
 		path = append(path, cur)
 
 		// no parent => cur is root
-		if it.ParentKey == 0 {
+		if it.ParentKey == "" {
 			rootKey = cur
 			return
 		}
@@ -46,14 +46,14 @@ func Ancestry(ctx context.Context, s processinstance.API, startKey int64) (rootK
 	}
 }
 
-func Descendants(ctx context.Context, s processinstance.API, rootKey int64) (desc []int64, edges map[int64][]int64, chain map[int64]d.ProcessInstance, err error) {
-	visited := make(map[int64]struct{})
-	edges = make(map[int64][]int64)
-	chain = make(map[int64]d.ProcessInstance)
+func Descendants(ctx context.Context, s processinstance.API, rootKey string) (desc []string, edges map[string][]string, chain map[string]d.ProcessInstance, err error) {
+	visited := make(map[string]struct{})
+	edges = make(map[string][]string)
+	chain = make(map[string]d.ProcessInstance)
 
 	// depth-first search (DFS) to explore the tree
-	var dfs func(int64) error
-	dfs = func(parent int64) error {
+	var dfs func(string) error
+	dfs = func(parent string) error {
 		// check for context cancellation
 		select {
 		case <-ctx.Done():
@@ -71,14 +71,14 @@ func Descendants(ctx context.Context, s processinstance.API, rootKey int64) (des
 		if _, ok := chain[parent]; !ok {
 			it, getErr := s.GetProcessInstanceByKey(ctx, parent)
 			if getErr != nil {
-				return fmt.Errorf("get %d: %w", parent, getErr)
+				return fmt.Errorf("get %s: %w", parent, getErr)
 			}
 			chain[parent] = it
 		}
 
 		children, e := s.GetDirectChildrenOfProcessInstance(ctx, parent)
 		if e != nil {
-			return fmt.Errorf("list children of %d: %w", parent, e)
+			return fmt.Errorf("list children of %s: %w", parent, e)
 		}
 
 		// keep an entry even if no children (useful for tree rendering)
@@ -106,7 +106,7 @@ func Descendants(ctx context.Context, s processinstance.API, rootKey int64) (des
 	return desc, edges, chain, nil
 }
 
-func Family(ctx context.Context, s processinstance.API, startKey int64) (fam []int64, edges map[int64][]int64, chain map[int64]d.ProcessInstance, err error) {
+func Family(ctx context.Context, s processinstance.API, startKey string) (fam []string, edges map[string][]string, chain map[string]d.ProcessInstance, err error) {
 	rootKey, _, _, err := Ancestry(ctx, s, startKey)
 	if err != nil {
 		return nil, nil, nil, fmt.Errorf("ancestry fetch: %w", err)

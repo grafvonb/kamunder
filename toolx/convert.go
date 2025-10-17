@@ -1,6 +1,10 @@
 package toolx
 
-import "github.com/oapi-codegen/nullable"
+import (
+	"strconv"
+
+	"github.com/oapi-codegen/nullable"
+)
 
 // Ptr returns a pointer to a copy of v (for value -> *T).
 func Ptr[T any](v T) *T { return &v }
@@ -170,4 +174,66 @@ func DerefSlicePtrE[S any, D any](p *[]S, f func(S) (D, error)) ([]D, error) {
 		out[i] = d
 	}
 	return out, nil
+}
+
+// Int64PtrToStringPtr maps *int64 -> *string using strconv.FormatInt. Returns nil if input is nil.
+func Int64PtrToStringPtr(p *int64) *string {
+	return MapPtr(p, func(v int64) string {
+		return strconv.FormatInt(v, 10)
+	})
+}
+
+// Int64PtrToString converts *int64 → string, returns "" if nil.
+func Int64PtrToString(p *int64) string {
+	return DerefMap(p, func(v int64) string {
+		return strconv.FormatInt(v, 10)
+	}, "")
+}
+
+// StringPtrToInt64 converts *string → int64 (0 if nil), error if parsing fails.
+func StringPtrToInt64(p *string) (int64, error) {
+	if p == nil {
+		return 0, nil
+	}
+	return strconv.ParseInt(*p, 10, 64)
+}
+
+// StringToInt64 converts string → int64, returns error if not parsable.
+func StringToInt64(s string) (int64, error) {
+	if s == "" {
+		return 0, nil
+	}
+	return strconv.ParseInt(s, 10, 64)
+}
+
+// StringToInt64Ptr converts string → *int64, returns nil if empty, error if invalid.
+func StringToInt64Ptr(s string) (*int64, error) {
+	if s == "" {
+		return nil, nil
+	}
+	v, err := strconv.ParseInt(s, 10, 64)
+	if err != nil {
+		return nil, err
+	}
+	return &v, nil
+}
+
+// StringPtrToInt64Ptr converts *string → *int64. Returns nil if input is nil, error if parsing fails.
+func StringPtrToInt64Ptr(p *string) (*int64, error) {
+	if p == nil {
+		return nil, nil
+	}
+	v, err := strconv.ParseInt(*p, 10, 64)
+	if err != nil {
+		return nil, err
+	}
+	return &v, nil
+}
+
+// Int64ToString converts int64 → string.
+func Int64ToString(v int64) string {
+	if v == 0 {
+		return ""
+	}
+	return strconv.FormatInt(v, 10)
 }

@@ -9,6 +9,7 @@ import (
 	"github.com/grafvonb/kamunder/config"
 	operatev88 "github.com/grafvonb/kamunder/internal/clients/camunda/v88/operate"
 	d "github.com/grafvonb/kamunder/internal/domain"
+	"github.com/grafvonb/kamunder/internal/services"
 	"github.com/grafvonb/kamunder/internal/services/httpc"
 	"github.com/grafvonb/kamunder/toolx"
 )
@@ -36,8 +37,13 @@ func New(cfg *config.Config, httpClient *http.Client, log *slog.Logger, opts ...
 	return s, nil
 }
 
-func (s *Service) GetProcessDefinitionByKey(ctx context.Context, key int64) (d.ProcessDefinition, error) {
-	resp, err := s.c.GetProcessDefinitionByKeyWithResponse(ctx, key)
+func (s *Service) GetProcessDefinitionByKey(ctx context.Context, key string, opts ...services.CallOption) (d.ProcessDefinition, error) {
+	_ = services.ApplyCallOptions(opts)
+	oldKey, err := toolx.StringToInt64(key)
+	if err != nil {
+		return d.ProcessDefinition{}, fmt.Errorf("converting process definition key %q to int64: %w", key, err)
+	}
+	resp, err := s.c.GetProcessDefinitionByKeyWithResponse(ctx, oldKey)
 	if err != nil {
 		return d.ProcessDefinition{}, err
 	}
@@ -51,7 +57,8 @@ func (s *Service) GetProcessDefinitionByKey(ctx context.Context, key int64) (d.P
 	return fromProcessDefinitionResponse(*resp.JSON200), nil
 }
 
-func (s *Service) SearchProcessDefinitions(ctx context.Context, filter d.ProcessDefinitionSearchFilterOpts, size int32) ([]d.ProcessDefinition, error) {
+func (s *Service) SearchProcessDefinitions(ctx context.Context, filter d.ProcessDefinitionSearchFilterOpts, size int32, opts ...services.CallOption) ([]d.ProcessDefinition, error) {
+	_ = services.ApplyCallOptions(opts)
 	body := operatev88.QueryProcessDefinition{
 		Filter: &operatev88.ProcessDefinition{
 			BpmnProcessId: &filter.BpmnProcessId,

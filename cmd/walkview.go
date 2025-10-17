@@ -22,7 +22,7 @@ func (p KeysPath) StandardLine(c Chain) string {
 	return p.join(c, func(item process.ProcessInstance) string {
 		var pTag, eTag, vTag string
 		if item.ProcessVersion > 0 {
-			pTag = fmt.Sprintf(" p:%d", item.ParentKey)
+			pTag = fmt.Sprintf(" p:%s", item.ParentKey)
 		} else {
 			pTag = " p:<root>"
 		}
@@ -34,7 +34,7 @@ func (p KeysPath) StandardLine(c Chain) string {
 		}
 
 		return fmt.Sprintf(
-			"%-16d %s %s v%s%s %s s:%s%s%s i:%t",
+			"%-16s %s %s v%s%s %s s:%s%s%s i:%t",
 			item.Key, item.TenantId, item.BpmnProcessId, version, vTag, item.State, item.StartDate, eTag, pTag, item.Incident,
 		)
 	}, "\n")
@@ -42,7 +42,7 @@ func (p KeysPath) StandardLine(c Chain) string {
 
 func (p KeysPath) PrettyLine(c Chain) string {
 	return p.join(c, func(it process.ProcessInstance) string {
-		return fmt.Sprintf("%d (%s)", it.Key, it.BpmnProcessId)
+		return fmt.Sprintf("%s (%s)", it.Key, it.BpmnProcessId)
 	}, " → ")
 }
 
@@ -52,7 +52,7 @@ func (p KeysPath) join(c Chain, label Label, sep string) string {
 	}
 	if label == nil {
 		label = func(it process.ProcessInstance) string {
-			return fmt.Sprintf("%d (%s)", it.Key, it.BpmnProcessId)
+			return fmt.Sprintf("%s (%s)", it.Key, it.BpmnProcessId)
 		}
 	}
 	out := make([]string, 0, len(p))

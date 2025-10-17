@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"log/slog"
+	"path/filepath"
 	"time"
 )
 
@@ -25,22 +26,15 @@ func (h *PlainHandler) Enabled(_ context.Context, lvl slog.Level) bool {
 
 func (h *PlainHandler) Handle(_ context.Context, r slog.Record) error {
 	level := r.Level.String()
-
-	// base message
 	line := fmt.Sprintf("%s %s", level, r.Message)
-
-	// optional timestamp
 	if h.withTimestamp {
 		ts := r.Time.Format(time.RFC3339)
 		line = fmt.Sprintf("%s %s", ts, line)
 	}
-
-	// optional source
-	//if h.withSource && r.PC != 0 {
-	//	fs := r.Source()
-	//	line = fmt.Sprintf("%s (%s:%d)", line, filepath.Base(fs.File), fs.Line)
-	//}
-
+	if h.withSource && r.PC != 0 {
+		fs := r.Source()
+		line = fmt.Sprintf("%s (%s:%d)", line, filepath.Base(fs.File), fs.Line)
+	}
 	_, err := fmt.Fprintln(h.w, line)
 	return err
 }

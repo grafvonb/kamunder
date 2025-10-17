@@ -12,7 +12,7 @@ import (
 const maxPDSearchSize int32 = 1000
 
 var (
-	flagPDKey               int64
+	flagPDKey               string
 	flagPDBpmnProcessID     string
 	flagPDProcessVersion    int32
 	flagPDProcessVersionTag string
@@ -46,11 +46,11 @@ var getProcessDefinitionCmd = &cobra.Command{
 
 		log.Debug("fetching process definitions")
 		searchFilterOpts := populatePDSearchFilterOpts()
-		if searchFilterOpts.Key > 0 {
-			log.Debug(fmt.Sprintf("searching by key: %d", searchFilterOpts.Key))
+		if searchFilterOpts.Key != "" {
+			log.Debug(fmt.Sprintf("searching by key: %s", searchFilterOpts.Key))
 			pd, err := cli.GetProcessDefinitionByKey(cmd.Context(), searchFilterOpts.Key)
 			if err != nil {
-				log.Error(fmt.Sprintf("error fetching process definition by key %d: %v", searchFilterOpts.Key, err))
+				log.Error(fmt.Sprintf("error fetching process definition by key %s: %v", searchFilterOpts.Key, err))
 				return
 			}
 			err = processDefinitionView(cmd, pd)
@@ -85,7 +85,7 @@ func init() {
 	getCmd.AddCommand(getProcessDefinitionCmd)
 
 	fs := getProcessDefinitionCmd.Flags()
-	fs.Int64VarP(&flagPDKey, "key", "k", 0, "resource key (e.g. process instance) to fetch")
+	fs.StringVarP(&flagPDKey, "key", "k", "", "resource key (e.g. process instance) to fetch")
 	fs.StringVarP(&flagPDBpmnProcessID, "bpmn-process-id", "b", "", "BPMN process ID to filter process instances")
 	fs.Int32VarP(&flagPDProcessVersion, "process-version", "v", 0, "process definition version")
 	fs.StringVar(&flagPDProcessVersionTag, "process-version-tag", "", "process definition version tag")
@@ -97,7 +97,7 @@ func init() {
 
 func populatePDSearchFilterOpts() process.ProcessDefinitionSearchFilterOpts {
 	var filter process.ProcessDefinitionSearchFilterOpts
-	if flagPDKey != 0 {
+	if flagPDKey != "" {
 		filter.Key = flagPDKey
 	}
 	if flagPDBpmnProcessID != "" {

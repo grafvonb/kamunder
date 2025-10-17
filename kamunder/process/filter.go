@@ -5,11 +5,11 @@ func (r ProcessInstances) FilterByHavingIncidents(has bool) ProcessInstances {
 }
 
 func (r ProcessInstances) FilterChildrenOnly() ProcessInstances {
-	return r.filterByBool(func(pi ProcessInstance) bool { return pi.ParentKey > 0 }, true)
+	return r.filterByBool(func(pi ProcessInstance) bool { return pi.ParentKey != "" }, true)
 }
 
 func (r ProcessInstances) FilterParentsOnly() ProcessInstances {
-	return r.filterByBool(func(pi ProcessInstance) bool { return pi.ParentKey == 0 }, true)
+	return r.filterByBool(func(pi ProcessInstance) bool { return pi.ParentKey == "" }, true)
 }
 
 func (r ProcessInstances) filterByBool(pred func(ProcessInstance) bool, want bool) ProcessInstances {
