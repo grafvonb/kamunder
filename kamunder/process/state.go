@@ -1,41 +1,49 @@
 package process
 
-import (
-	"errors"
-	"fmt"
-	"strings"
-)
+import "strings"
 
-// State is the process-instance state filter.
 type State string
 
-func (s State) EqualsIgnoreCase(other State) bool {
-	return strings.EqualFold(string(s), string(other))
-}
-
 const (
-	StateAll       State = "all"
-	StateActive    State = "active"
-	StateCompleted State = "completed"
-	StateCanceled  State = "canceled"
+	StateAll        State = "ALL"
+	StateActive     State = "ACTIVE"
+	StateCompleted  State = "COMPLETED"
+	StateCanceled   State = "CANCELED"
+	StateTerminated State = "TERMINATED"
 )
 
 func (s State) String() string { return string(s) }
 
-// ParseState parses a string (case-insensitive) into a State.
-func ParseState(in string) (State, error) {
+func (s State) EqualsIgnoreCase(other State) bool {
+	return strings.EqualFold(s.String(), other.String())
+}
+
+func (s State) In(states ...State) bool {
+	for _, st := range states {
+		if s.EqualsIgnoreCase(st) {
+			return true
+		}
+	}
+	return false
+}
+
+func ParseState(in string) (State, bool) {
 	switch strings.ToLower(in) {
 	case "all":
-		return StateAll, nil
+		return StateAll, true
 	case "active":
-		return StateActive, nil
-	case "canceled":
-		return StateCanceled, nil
+		return StateActive, true
 	case "completed":
-		return StateCompleted, nil
+		return StateCompleted, true
+	case "canceled", "cancelled":
+		return StateCanceled, true
+	case "terminated":
+		return StateTerminated, true
 	default:
-		return "", fmt.Errorf("%q %w", in, ErrUnknownStateFilter)
+		return "", false
 	}
 }
 
-var ErrUnknownStateFilter = errors.New("is unknown (valid: all, active, canceled, completed)")
+func (s State) IsTerminal() bool {
+	return s.In(StateCompleted, StateCanceled, StateTerminated)
+}

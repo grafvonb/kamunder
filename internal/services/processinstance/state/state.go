@@ -14,6 +14,7 @@ import (
 
 type PIGetter interface {
 	GetProcessInstanceByKey(ctx context.Context, key string, opts ...services.CallOption) (d.ProcessInstance, error)
+	GetProcessInstanceStateByKey(ctx context.Context, key string, opts ...services.CallOption) (d.State, error)
 }
 
 // WaitForProcessInstanceState waits until the instance reaches the desired state.
@@ -21,7 +22,6 @@ type PIGetter interface {
 // - Returns nil on success or an error on failure/timeout.
 func WaitForProcessInstanceState(ctx context.Context, s PIGetter, cfg *config.Config, log *slog.Logger, key string, desiredState d.State, opts ...services.CallOption) error {
 	_ = services.ApplyCallOptions(opts)
-
 	backoff := cfg.App.Backoff
 	if backoff.Timeout > 0 {
 		deadline := time.Now().Add(backoff.Timeout)
@@ -34,20 +34,18 @@ func WaitForProcessInstanceState(ctx context.Context, s PIGetter, cfg *config.Co
 
 	attempts := 0
 	delay := backoff.InitialDelay
-
 	for {
 		if errInDelay := ctx.Err(); errInDelay != nil {
 			return errInDelay
 		}
 		attempts++
-
-		pi, errInDelay := s.GetProcessInstanceByKey(ctx, key)
+		st, errInDelay := s.GetProcessInstanceStateByKey(ctx, key)
 		if errInDelay == nil {
-			if pi.State.EqualsIgnoreCase(desiredState) {
-				log.Debug(fmt.Sprintf("process instance %s reached desired state %q", key, desiredState))
+			if st.EqualsIgnoreCase(desiredState) {
+				log.Debug(fmt.Sprintf("process instance %s reached desired state %s", key, desiredState))
 				return nil
 			}
-			log.Debug(fmt.Sprintf("process instance %s currently in state %q; waiting...", key, pi.State))
+			log.Debug(fmt.Sprintf("process instance %s currently in state %s; waiting...", key, st))
 		} else if errInDelay != nil {
 			if strings.Contains(errInDelay.Error(), "status 404") {
 				log.Debug(fmt.Sprintf("process instance %s is absent (not found); waiting...", key))

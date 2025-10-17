@@ -5,11 +5,11 @@ import "strings"
 type State string
 
 const (
-	StateAll        State = "all"
-	StateActive     State = "active"
-	StateCompleted  State = "completed"
-	StateCanceled   State = "canceled"
-	StateTerminated State = "terminated"
+	StateAll        State = "ALL"
+	StateActive     State = "ACTIVE"
+	StateCompleted  State = "COMPLETED"
+	StateCanceled   State = "CANCELED"
+	StateTerminated State = "TERMINATED"
 )
 
 func (s State) String() string { return string(s) }

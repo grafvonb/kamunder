@@ -11,6 +11,7 @@ var cancelCmd = &cobra.Command{
 	RunE: func(cmd *cobra.Command, args []string) error {
 		return cmd.Help()
 	},
+	SuggestFor: []string{"cancle", "cancl"},
 }
 
 func init() {
