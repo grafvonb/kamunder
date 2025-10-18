@@ -3,10 +3,8 @@ package cmd
 import (
 	"fmt"
 
-	"github.com/grafvonb/kamunder/kamunder"
 	"github.com/grafvonb/kamunder/kamunder/ferrors"
 	"github.com/grafvonb/kamunder/kamunder/process"
-	"github.com/grafvonb/kamunder/toolx/logging"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -41,16 +39,11 @@ var getProcessInstanceCmd = &cobra.Command{
 	Short:   "Get process instances.",
 	Aliases: []string{"process-instances", "pi", "pis"},
 	Run: func(cmd *cobra.Command, args []string) {
-		log := logging.FromContext(cmd.Context())
-		svcs, err := NewFromContext(cmd.Context())
+		cli, log, err := NewCli(cmd)
 		if err != nil {
-			ferrors.HandleAndExit(log, fmt.Errorf("error getting services from context: %w", err))
+			ferrors.HandleAndExit(log, err)
 		}
-		cli, err := kamunder.New(
-			kamunder.WithConfig(svcs.Config),
-			kamunder.WithHTTPClient(svcs.HTTP.Client()),
-			kamunder.WithLogger(log),
-		)
+
 		if err != nil {
 			ferrors.HandleAndExit(log, fmt.Errorf("error creating kamunder client: %w", err))
 		}

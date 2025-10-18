@@ -7,8 +7,8 @@ import (
 	"github.com/grafvonb/kamunder/kamunder/process"
 )
 
-type Chain map[int64]process.ProcessInstance
-type KeysPath []int64
+type Chain map[string]process.ProcessInstance
+type KeysPath []string
 
 type Label func(process.ProcessInstance) string
 

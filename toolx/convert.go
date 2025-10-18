@@ -237,3 +237,14 @@ func Int64ToString(v int64) string {
 	}
 	return strconv.FormatInt(v, 10)
 }
+
+func MapMap[K comparable, S any, D any](in map[K]S, f func(S) D) map[K]D {
+	if in == nil {
+		return nil
+	}
+	out := make(map[K]D, len(in))
+	for k, v := range in {
+		out[k] = f(v)
+	}
+	return out
+}

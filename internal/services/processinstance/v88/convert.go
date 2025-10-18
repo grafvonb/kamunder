@@ -1,6 +1,8 @@
 package v88
 
 import (
+	"time"
+
 	camundav88 "github.com/grafvonb/kamunder/internal/clients/camunda/v88/camunda"
 	operatev88 "github.com/grafvonb/kamunder/internal/clients/camunda/v88/operate"
 	d "github.com/grafvonb/kamunder/internal/domain"
@@ -26,5 +28,32 @@ func fromProcessInstanceResponse(r operatev88.ProcessInstance) d.ProcessInstance
 }
 
 func fromProcessInstanceResult(r camundav88.ProcessInstanceResult) d.ProcessInstance {
-	return d.ProcessInstance{}
+	return d.ProcessInstance{
+		BpmnProcessId:             r.ProcessDefinitionId,
+		EndDate:                   formatTimePtr(r.EndDate),
+		Incident:                  r.HasIncident,
+		Key:                       r.ProcessInstanceKey,
+		ParentFlowNodeInstanceKey: toolx.Deref(r.ParentElementInstanceKey, ""),
+		ParentKey:                 toolx.Deref(r.ParentProcessInstanceKey, ""),
+		ProcessDefinitionKey:      r.ProcessDefinitionKey,
+		ProcessVersion:            r.ProcessDefinitionVersion,
+		ProcessVersionTag:         toolx.Deref(r.ProcessDefinitionVersionTag, ""),
+		StartDate:                 formatTime(r.StartDate),
+		State:                     d.State(r.State),
+		TenantId:                  r.TenantId,
+	}
+}
+
+func formatTime(t time.Time) string {
+	if t.IsZero() {
+		return ""
+	}
+	return t.UTC().Format(time.RFC3339Nano)
+}
+
+func formatTimePtr(p *time.Time) string {
+	if p == nil {
+		return ""
+	}
+	return formatTime(*p)
 }

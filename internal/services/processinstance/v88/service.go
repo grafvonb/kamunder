@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log/slog"
 	"net/http"
+	"strings"
 
 	"github.com/grafvonb/kamunder/config"
 	camundav88 "github.com/grafvonb/kamunder/internal/clients/camunda/v88/camunda"
@@ -12,7 +13,8 @@ import (
 	d "github.com/grafvonb/kamunder/internal/domain"
 	"github.com/grafvonb/kamunder/internal/services"
 	"github.com/grafvonb/kamunder/internal/services/httpc"
-	"github.com/grafvonb/kamunder/internal/services/processinstance/state"
+	"github.com/grafvonb/kamunder/internal/services/processinstance/waiter"
+	"github.com/grafvonb/kamunder/internal/services/processinstance/walker"
 	"github.com/grafvonb/kamunder/toolx"
 )
 
@@ -51,13 +53,35 @@ func New(cfg *config.Config, httpClient *http.Client, log *slog.Logger, opts ...
 }
 
 func (s *Service) GetDirectChildrenOfProcessInstance(ctx context.Context, key string, opts ...services.CallOption) ([]d.ProcessInstance, error) {
-	//TODO implement me
-	panic("implement me")
+	_ = services.ApplyCallOptions(opts)
+	filter := d.ProcessInstanceSearchFilterOpts{
+		ParentKey: key,
+	}
+	resp, err := s.SearchForProcessInstances(ctx, filter, 1000)
+	if err != nil {
+		return nil, fmt.Errorf("searching for children of process instance with key %s: %w", key, err)
+	}
+	return resp, nil
 }
 
 func (s *Service) FilterProcessInstanceWithOrphanParent(ctx context.Context, items []d.ProcessInstance, opts ...services.CallOption) ([]d.ProcessInstance, error) {
-	//TODO implement me
-	panic("implement me")
+	_ = services.ApplyCallOptions(opts)
+	if items == nil {
+		return nil, nil
+	}
+	var result []d.ProcessInstance
+	for _, it := range items {
+		if it.ParentKey == "" {
+			continue
+		}
+		_, err := s.GetProcessInstanceByKey(ctx, it.ParentKey)
+		if err != nil && strings.Contains(err.Error(), "status 404") {
+			result = append(result, it)
+		} else if err != nil {
+			return nil, err
+		}
+	}
+	return result, nil
 }
 
 func (s *Service) SearchForProcessInstances(ctx context.Context, filter d.ProcessInstanceSearchFilterOpts, size int32, opts ...services.CallOption) ([]d.ProcessInstance, error) {
@@ -123,7 +147,7 @@ func (s *Service) CancelProcessInstance(ctx context.Context, key string, opts ..
 	if cCfg.Wait {
 		s.log.Info(fmt.Sprintf("waiting for process instance with key %s to be cancelled by workflow engine...", key))
 		states := []d.State{d.StateCanceled, d.StateTerminated}
-		if _, err = state.WaitForProcessInstanceState(ctx, s, s.cfg, s.log, key, states, opts...); err != nil {
+		if _, err = waiter.WaitForProcessInstanceState(ctx, s, s.cfg, s.log, key, states, opts...); err != nil {
 			return d.CancelResponse{}, fmt.Errorf("waiting for canceled state failed for %s: %w", key, err)
 		}
 	}
@@ -172,7 +196,7 @@ func (s *Service) DeleteProcessInstance(ctx context.Context, key string, opts ..
 			}
 			s.log.Info(fmt.Sprintf("waiting for process instance with key %s to be cancelled by workflow engine...", key))
 			states := []d.State{d.StateCanceled}
-			if _, err = state.WaitForProcessInstanceState(ctx, s, s.cfg, s.log, key, states, opts...); err != nil {
+			if _, err = waiter.WaitForProcessInstanceState(ctx, s, s.cfg, s.log, key, states, opts...); err != nil {
 				return d.ChangeStatus{}, fmt.Errorf("waiting for canceled state failed for %s: %w", key, err)
 			}
 			s.log.Info(fmt.Sprintf("retrying deletion of process instance with key %d", oldKey))
@@ -210,5 +234,17 @@ func (s *Service) GetProcessInstanceByKey(ctx context.Context, key string, opts 
 }
 
 func (s *Service) WaitForProcessInstanceState(ctx context.Context, key string, desired d.States, opts ...services.CallOption) (d.State, error) {
-	return state.WaitForProcessInstanceState(ctx, s, s.cfg, s.log, key, desired, opts...)
+	return waiter.WaitForProcessInstanceState(ctx, s, s.cfg, s.log, key, desired, opts...)
+}
+
+func (s *Service) Ancestry(ctx context.Context, startKey string, opts ...services.CallOption) (rootKey string, path []string, chain map[string]d.ProcessInstance, err error) {
+	return walker.Ancestry(ctx, s, startKey, opts...)
+}
+
+func (s *Service) Descendants(ctx context.Context, rootKey string, opts ...services.CallOption) (desc []string, edges map[string][]string, chain map[string]d.ProcessInstance, err error) {
+	return walker.Descendants(ctx, s, rootKey, opts...)
+}
+
+func (s *Service) Family(ctx context.Context, startKey string, opts ...services.CallOption) (fam []string, edges map[string][]string, chain map[string]d.ProcessInstance, err error) {
+	return walker.Family(ctx, s, startKey, opts...)
 }

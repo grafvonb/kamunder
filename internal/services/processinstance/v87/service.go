@@ -13,7 +13,8 @@ import (
 	d "github.com/grafvonb/kamunder/internal/domain"
 	"github.com/grafvonb/kamunder/internal/services"
 	"github.com/grafvonb/kamunder/internal/services/httpc"
-	"github.com/grafvonb/kamunder/internal/services/processinstance/state"
+	"github.com/grafvonb/kamunder/internal/services/processinstance/waiter"
+	"github.com/grafvonb/kamunder/internal/services/processinstance/walker"
 	"github.com/grafvonb/kamunder/toolx"
 )
 
@@ -167,7 +168,7 @@ func (s *Service) CancelProcessInstance(ctx context.Context, key string, opts ..
 	if cCfg.Wait {
 		s.log.Info(fmt.Sprintf("waiting for process instance with key %s to be cancelled by workflow engine...", key))
 		states := []d.State{d.StateCanceled}
-		if _, err = state.WaitForProcessInstanceState(ctx, s, s.cfg, s.log, key, states, opts...); err != nil {
+		if _, err = waiter.WaitForProcessInstanceState(ctx, s, s.cfg, s.log, key, states, opts...); err != nil {
 			return d.CancelResponse{}, fmt.Errorf("waiting for canceled state failed for %s: %w", key, err)
 		}
 	}
@@ -220,7 +221,7 @@ func (s *Service) DeleteProcessInstance(ctx context.Context, key string, opts ..
 			}
 			s.log.Info(fmt.Sprintf("waiting for process instance with key %s to be cancelled by workflow engine...", key))
 			states := []d.State{d.StateCanceled, d.StateTerminated}
-			if _, err = state.WaitForProcessInstanceState(ctx, s, s.cfg, s.log, key, states); err != nil {
+			if _, err = waiter.WaitForProcessInstanceState(ctx, s, s.cfg, s.log, key, states); err != nil {
 				return d.ChangeStatus{}, fmt.Errorf("waiting for canceled state failed for %s: %w", key, err)
 			}
 			s.log.Info(fmt.Sprintf("retrying deletion of process instance with key %d", oldKey))
@@ -241,5 +242,17 @@ func (s *Service) DeleteProcessInstance(ctx context.Context, key string, opts ..
 }
 
 func (s *Service) WaitForProcessInstanceState(ctx context.Context, key string, desired d.States, opts ...services.CallOption) (d.State, error) {
-	return state.WaitForProcessInstanceState(ctx, s, s.cfg, s.log, key, desired, opts...)
+	return waiter.WaitForProcessInstanceState(ctx, s, s.cfg, s.log, key, desired, opts...)
+}
+
+func (s *Service) Ancestry(ctx context.Context, startKey string, opts ...services.CallOption) (rootKey string, path []string, chain map[string]d.ProcessInstance, err error) {
+	return walker.Ancestry(ctx, s, startKey, opts...)
+}
+
+func (s *Service) Descendants(ctx context.Context, rootKey string, opts ...services.CallOption) (desc []string, edges map[string][]string, chain map[string]d.ProcessInstance, err error) {
+	return walker.Descendants(ctx, s, rootKey, opts...)
+}
+
+func (s *Service) Family(ctx context.Context, startKey string, opts ...services.CallOption) (fam []string, edges map[string][]string, chain map[string]d.ProcessInstance, err error) {
+	return walker.Family(ctx, s, startKey, opts...)
 }

@@ -1,4 +1,4 @@
-package state
+package waiter
 
 import (
 	"context"
@@ -12,7 +12,7 @@ import (
 	"github.com/grafvonb/kamunder/internal/services"
 )
 
-type PIGetter interface {
+type PIWaiter interface {
 	GetProcessInstanceByKey(ctx context.Context, key string, opts ...services.CallOption) (d.ProcessInstance, error)
 	GetProcessInstanceStateByKey(ctx context.Context, key string, opts ...services.CallOption) (d.State, error)
 }
@@ -20,7 +20,7 @@ type PIGetter interface {
 // WaitForProcessInstanceState waits until the instance reaches one of the desired states.
 // - Respects ctx cancellation/deadline; augments with cfg.Timeout if set
 // - Returns nil on success or an error on failure/timeout.
-func WaitForProcessInstanceState(ctx context.Context, s PIGetter, cfg *config.Config, log *slog.Logger, key string, desired d.States, opts ...services.CallOption) (d.State, error) {
+func WaitForProcessInstanceState(ctx context.Context, s PIWaiter, cfg *config.Config, log *slog.Logger, key string, desired d.States, opts ...services.CallOption) (d.State, error) {
 	_ = services.ApplyCallOptions(opts)
 	backoff := cfg.App.Backoff
 	if backoff.Timeout > 0 {

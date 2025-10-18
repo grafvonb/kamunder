@@ -49,6 +49,10 @@ func fromDomainProcessInstances(xs []d.ProcessInstance) ProcessInstances {
 	}
 }
 
+func fromDomainProcessInstanceMap(xs map[string]d.ProcessInstance) map[string]ProcessInstance {
+	return toolx.MapMap(xs, fromDomainProcessInstance)
+}
+
 func toDomainProcessInstance(x ProcessInstance) d.ProcessInstance {
 	return d.ProcessInstance{
 		BpmnProcessId:             x.BpmnProcessId,
