@@ -44,7 +44,6 @@ build/
 
 # local build artifacts from Makefile
 bin/
-kamunder
 
 # macos / windows explorer cruft
 .DS_Store
