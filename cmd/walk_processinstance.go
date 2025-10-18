@@ -85,7 +85,4 @@ func init() {
 	_ = walkProcessInstanceCmd.RegisterFlagCompletionFunc("mode", func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 		return []string{modeParent, modeChildren, modeFamily}, cobra.ShellCompDirectiveNoFileComp
 	})
-
-	// view options
-	fs.BoolVar(&flagPIKeysOnly, "keys-only", false, "only print the keys of the resources")
 }

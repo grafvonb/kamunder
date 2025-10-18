@@ -16,7 +16,18 @@ const (
 	ModeKeysOnly
 )
 
-// ----- Common single-item and list renderers -----
+func (m RenderMode) String() string {
+	switch m {
+	case ModeJSON:
+		return "json"
+	case ModeOneLine:
+		return "one-line"
+	case ModeKeysOnly:
+		return "keys-only"
+	default:
+		return fmt.Sprintf("unknown(%d)", m)
+	}
+}
 
 func itemView[Item any](cmd *cobra.Command, item Item, mode RenderMode, oneLine func(Item) string, keyOf func(Item) string) error {
 	switch mode {
@@ -61,28 +72,12 @@ func listOrJSON[Resp any, Item any](
 	return nil
 }
 
-// ----- Process Instances (single and list) -----
-
 func processInstanceView(cmd *cobra.Command, item process.ProcessInstance) error {
-	switch {
-	case flagAsJson:
-		return itemView(cmd, item, ModeJSON, oneLinePI, func(it process.ProcessInstance) string { return it.Key })
-	case flagPIKeysOnly:
-		return itemView(cmd, item, ModeKeysOnly, oneLinePI, func(it process.ProcessInstance) string { return it.Key })
-	default:
-		return itemView(cmd, item, ModeOneLine, oneLinePI, func(it process.ProcessInstance) string { return it.Key })
-	}
+	return itemView(cmd, item, pickMode(), oneLinePI, func(it process.ProcessInstance) string { return it.Key })
 }
 
 func listProcessInstancesView(cmd *cobra.Command, resp process.ProcessInstances) error {
-	switch {
-	case flagAsJson:
-		return listOrJSON(cmd, resp, resp.Items, ModeJSON, oneLinePI, func(it process.ProcessInstance) string { return it.Key })
-	case flagPIKeysOnly:
-		return listOrJSON(cmd, resp, resp.Items, ModeKeysOnly, oneLinePI, func(it process.ProcessInstance) string { return it.Key })
-	default:
-		return listOrJSON(cmd, resp, resp.Items, ModeOneLine, oneLinePI, func(it process.ProcessInstance) string { return it.Key })
-	}
+	return listOrJSON(cmd, resp, resp.Items, pickMode(), oneLinePI, func(it process.ProcessInstance) string { return it.Key })
 }
 
 func oneLinePI(it process.ProcessInstance) string {
@@ -105,28 +100,12 @@ func oneLinePI(it process.ProcessInstance) string {
 	)
 }
 
-// ----- Process Definitions (single and list) -----
-
 func processDefinitionView(cmd *cobra.Command, item process.ProcessDefinition) error {
-	switch {
-	case flagAsJson:
-		return itemView(cmd, item, ModeJSON, oneLinePD, func(it process.ProcessDefinition) string { return it.Key })
-	case flagPDKeysOnly:
-		return itemView(cmd, item, ModeKeysOnly, oneLinePD, func(it process.ProcessDefinition) string { return it.Key })
-	default:
-		return itemView(cmd, item, ModeOneLine, oneLinePD, func(it process.ProcessDefinition) string { return it.Key })
-	}
+	return itemView(cmd, item, pickMode(), oneLinePD, func(it process.ProcessDefinition) string { return it.Key })
 }
 
 func listProcessDefinitionsView(cmd *cobra.Command, resp process.ProcessDefinitions) error {
-	switch {
-	case flagAsJson:
-		return listOrJSON(cmd, resp, resp.Items, ModeJSON, oneLinePD, func(it process.ProcessDefinition) string { return it.Key })
-	case flagPDKeysOnly:
-		return listOrJSON(cmd, resp, resp.Items, ModeKeysOnly, oneLinePD, func(it process.ProcessDefinition) string { return it.Key })
-	default:
-		return listOrJSON(cmd, resp, resp.Items, ModeOneLine, oneLinePD, func(it process.ProcessDefinition) string { return it.Key })
-	}
+	return listOrJSON(cmd, resp, resp.Items, pickMode(), oneLinePD, func(it process.ProcessDefinition) string { return it.Key })
 }
 
 func oneLinePD(it process.ProcessDefinition) string {
@@ -141,9 +120,9 @@ func oneLinePD(it process.ProcessDefinition) string {
 
 func pickMode() RenderMode {
 	switch {
-	case flagAsJson:
+	case flagViewAsJson:
 		return ModeJSON
-	case flagPIKeysOnly: // reuse PI keys-only for paths
+	case flagViewKeysOnly:
 		return ModeKeysOnly
 	default:
 		return ModeOneLine

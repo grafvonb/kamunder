@@ -17,11 +17,6 @@ var (
 	flagPDProcessVersionTag string
 )
 
-// view options
-var (
-	flagPDKeysOnly bool
-)
-
 var getProcessDefinitionCmd = &cobra.Command{
 	Use:     "process-definition",
 	Short:   "Get deployed process definitions.",
@@ -66,8 +61,6 @@ func init() {
 	fs.StringVarP(&flagPDBpmnProcessID, "bpmn-process-id", "b", "", "BPMN process ID to filter process instances")
 	fs.Int32VarP(&flagPDProcessVersion, "process-version", "v", 0, "process definition version")
 	fs.StringVar(&flagPDProcessVersionTag, "process-version-tag", "", "process definition version tag")
-
-	fs.BoolVar(&flagPDKeysOnly, "keys-only", false, "show only keys in output")
 }
 
 func populatePDSearchFilterOpts() process.ProcessDefinitionSearchFilterOpts {

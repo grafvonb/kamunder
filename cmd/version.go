@@ -15,7 +15,7 @@ var versionCmd = &cobra.Command{
 	Use:   "version",
 	Short: "Print version information",
 	Run: func(cmd *cobra.Command, args []string) {
-		if flagAsJson {
+		if flagViewAsJson {
 			out := map[string]string{
 				"version": version,
 				"commit":  commit,

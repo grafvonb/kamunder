@@ -29,11 +29,6 @@ var (
 	flagPINoIncidentsOnly   bool
 )
 
-// view options
-var (
-	flagPIKeysOnly bool
-)
-
 var getProcessInstanceCmd = &cobra.Command{
 	Use:     "process-instance",
 	Short:   "Get process instances.",
@@ -48,7 +43,7 @@ var getProcessInstanceCmd = &cobra.Command{
 			ferrors.HandleAndExit(log, fmt.Errorf("error creating kamunder client: %w", err))
 		}
 
-		log.Debug("fetching process instances")
+		log.Debug(fmt.Sprintf("fetching process instances, render mode: %s", pickMode()))
 		searchFilterOpts := populatePISearchFilterOpts()
 		printFilter(cmd)
 		if searchFilterOpts.Key != "" {
@@ -117,9 +112,6 @@ func init() {
 	fs.BoolVar(&flagPIOrphanParentsOnly, "orphan-parents-only", false, "show only child instances whose parent does not exist (return 404 on get by key)")
 	fs.BoolVar(&flagPIIncidentsOnly, "incidents-only", false, "show only process instances that have incidents")
 	fs.BoolVar(&flagPINoIncidentsOnly, "no-incidents-only", false, "show only process instances that have no incidents")
-
-	// view options
-	fs.BoolVar(&flagPIKeysOnly, "keys-only", false, "show only keys in output")
 }
 
 func populatePISearchFilterOpts() process.ProcessInstanceSearchFilterOpts {
