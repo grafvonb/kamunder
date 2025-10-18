@@ -12,11 +12,11 @@ var (
 	flagWalkMode string
 )
 
-var validWalkModes = map[string]bool{
-	"parent":   true,
-	"children": true,
-	"family":   true,
-}
+const (
+	modeParent   = "parent"
+	modeChildren = "children"
+	modeFamily   = "family"
+)
 
 var walkProcessInstanceCmd = &cobra.Command{
 	Use:     "process-instance",
@@ -27,37 +27,48 @@ var walkProcessInstanceCmd = &cobra.Command{
 		if err != nil {
 			ferrors.HandleAndExit(log, err)
 		}
-		if !validWalkModes[flagWalkMode] {
-			ferrors.HandleAndExit(log, fmt.Errorf("%w: invalid value for --walk: %q (must be parent, children, or family)", ferrors.ErrBadRequest, flagWalkMode))
+
+		type walker struct {
+			fetch func() (KeysPath, Chain, error)
+			view  func(*cobra.Command, KeysPath, Chain) error
 		}
 
-		var path KeysPath
-		var chain Chain
+		walkers := map[string]walker{
+			modeParent: {
+				fetch: func() (KeysPath, Chain, error) {
+					_, path, chain, err := cli.Ancestry(cmd.Context(), flagWalkKey, collectOptions()...)
+					return path, chain, err
+				},
+				view: ancestorsView,
+			},
+			modeChildren: {
+				fetch: func() (KeysPath, Chain, error) {
+					path, _, chain, err := cli.Descendants(cmd.Context(), flagWalkKey, collectOptions()...)
+					return path, chain, err
+				},
+				view: descendantsView,
+			},
+			modeFamily: {
+				fetch: func() (KeysPath, Chain, error) {
+					path, _, chain, err := cli.Family(cmd.Context(), flagWalkKey, collectOptions()...)
+					return path, chain, err
+				},
+				view: familyView,
+			},
+		}
 
-		switch flagWalkMode {
-		case "parent":
-			_, path, chain, err = cli.Ancestry(cmd.Context(), flagWalkKey, collectOptions()...)
-			if err != nil {
-				ferrors.HandleAndExit(log, err)
-			}
-		case "children":
-			path, _, chain, err = cli.Descendants(cmd.Context(), flagWalkKey, collectOptions()...)
-			if err != nil {
-				ferrors.HandleAndExit(log, err)
-			}
-		case "family":
-			path, _, chain, err = cli.Family(cmd.Context(), flagWalkKey, collectOptions()...)
-			if err != nil {
-				ferrors.HandleAndExit(log, err)
-			}
-		default:
-			ferrors.HandleAndExit(log, fmt.Errorf("%w: invalid value for --walk: %q (must be parent, children, or family)", ferrors.ErrBadRequest, flagWalkMode))
+		w, ok := walkers[flagWalkMode]
+		if !ok {
+			ferrors.HandleAndExit(log, fmt.Errorf("invalid --mode %q (must be %s, %s, or %s)", flagWalkMode, modeParent, modeChildren, modeFamily))
 		}
-		if flagPDKeysOnly {
-			cmd.Println(path.KeysOnly(chain))
-			return
+
+		path, chain, err := w.fetch()
+		if err != nil {
+			ferrors.HandleAndExit(log, err)
 		}
-		cmd.Println(path.StandardLine(chain))
+		if err := w.view(cmd, path, chain); err != nil {
+			ferrors.HandleAndExit(log, err)
+		}
 	},
 }
 
@@ -67,9 +78,14 @@ func init() {
 	fs := walkProcessInstanceCmd.Flags()
 	fs.StringVar(&flagWalkKey, "key", "", "start walking from this process instance key")
 	_ = walkProcessInstanceCmd.MarkFlagRequired("key")
-	fs.StringVar(&flagWalkMode, "mode", "parent", "walk mode: parent, children, family")
-	_ = walkProcessInstanceCmd.MarkFlagRequired("mode")
+
+	fs.StringVar(&flagWalkMode, "mode", modeParent, "walk mode: parent, children, family")
+
+	// shell completion for --mode
+	_ = walkProcessInstanceCmd.RegisterFlagCompletionFunc("mode", func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+		return []string{modeParent, modeChildren, modeFamily}, cobra.ShellCompDirectiveNoFileComp
+	})
 
 	// view options
-	fs.BoolVarP(&flagPDKeysOnly, "keys-only", "", false, "only print the keys of the resources")
+	fs.BoolVar(&flagPIKeysOnly, "keys-only", false, "only print the keys of the resources")
 }

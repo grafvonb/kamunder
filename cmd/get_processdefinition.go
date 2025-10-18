@@ -50,13 +50,6 @@ var getProcessDefinitionCmd = &cobra.Command{
 			if err != nil {
 				ferrors.HandleAndExit(log, fmt.Errorf("error fetching process definitions: %w", err))
 			}
-			if flagPDKeysOnly {
-				err = listKeyOnlyProcessDefinitionsView(cmd, pds)
-				if err != nil {
-					ferrors.HandleAndExit(log, fmt.Errorf("error rendering keys-only view: %w", err))
-				}
-				return
-			}
 			err = listProcessDefinitionsView(cmd, pds)
 			if err != nil {
 				ferrors.HandleAndExit(log, fmt.Errorf("error rendering items view: %w", err))
@@ -74,9 +67,7 @@ func init() {
 	fs.Int32VarP(&flagPDProcessVersion, "process-version", "v", 0, "process definition version")
 	fs.StringVar(&flagPDProcessVersionTag, "process-version-tag", "", "process definition version tag")
 
-	// view options
 	fs.BoolVar(&flagPDKeysOnly, "keys-only", false, "show only keys in output")
-	fs.BoolVar(&flagOneLine, "one-line", false, "output one line per item")
 }
 
 func populatePDSearchFilterOpts() process.ProcessDefinitionSearchFilterOpts {

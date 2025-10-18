@@ -18,9 +18,8 @@ import (
 
 var (
 	flagShowConfig bool
-	//nolint:unused
-	flagAsJson bool
-	flagQuiet  bool
+	flagAsJson     bool
+	flagQuiet      bool
 )
 
 var rootCmd = &cobra.Command{
@@ -104,6 +103,7 @@ func Execute() {
 func init() {
 	pf := rootCmd.PersistentFlags()
 	pf.BoolVarP(&flagQuiet, "quiet", "q", false, "suppress all output, except errors")
+	pf.BoolVarP(&flagAsJson, "json", "j", false, "output as JSON")
 
 	pf.String("config", "", "path to config file")
 
