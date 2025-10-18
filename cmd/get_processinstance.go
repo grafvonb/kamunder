@@ -89,13 +89,6 @@ var getProcessInstanceCmd = &cobra.Command{
 			if flagPINoIncidentsOnly {
 				pisr = pisr.FilterByHavingIncidents(false)
 			}
-			if flagPIKeysOnly {
-				err = listKeyOnlyProcessInstancesView(cmd, pisr)
-				if err != nil {
-					ferrors.HandleAndExit(log, fmt.Errorf("error rendering keys-only view: %w", err))
-				}
-				return
-			}
 			err = listProcessInstancesView(cmd, pisr)
 			if err != nil {
 				ferrors.HandleAndExit(log, fmt.Errorf("error rendering items view: %w", err))
