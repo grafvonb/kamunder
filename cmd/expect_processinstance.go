@@ -11,8 +11,8 @@ import (
 )
 
 var (
-	flagExpectPIKey   string
-	flagExpectPIState string
+	flagExpectPIKey    string
+	flagExpectPIStates []string
 )
 
 var expectProcessInstanceCmd = &cobra.Command{
@@ -35,19 +35,18 @@ var expectProcessInstanceCmd = &cobra.Command{
 			log.Error(fmt.Sprintf("error creating kamunder client: %v", err))
 			return
 		}
-		st, ok := process.ParseState(flagExpectPIState)
-		if ok && st != process.StateAll {
-			log.Info(fmt.Sprintf("waiting for process instance %s to reach state %s", flagExpectPIKey, st))
-			err = cli.WaitForProcessInstanceState(cmd.Context(), flagExpectPIKey, st, collectOptions()...)
-			if err != nil {
-				log.Error(fmt.Sprintf("error waiting for a process instance %s to reach a %s state: %v", flagCancelPIKey, st, err))
-				return
-			}
-			log.Info(fmt.Sprintf("process instance %s reached desired state %s", flagCancelPIKey, st))
-		} else {
-			log.Error(fmt.Sprintf("invalid process instance state: %s", flagPIState))
+		states, err := process.ParseStates(flagExpectPIStates)
+		if err != nil {
+			log.Error(fmt.Sprintf("error parsing states: %v", err))
 			return
 		}
+		log.Info(fmt.Sprintf("waiting for process instance %s to reach one of the states [%s]", flagExpectPIKey, states))
+		got, err := cli.WaitForProcessInstanceState(cmd.Context(), flagExpectPIKey, states, collectOptions()...)
+		if err != nil {
+			log.Error(fmt.Sprintf("error waiting for a process instance %s to reach one of states [%s] : %v", flagExpectPIKey, states, err))
+			return
+		}
+		log.Info(fmt.Sprintf("process instance %s reached desired state %s", flagExpectPIKey, got))
 	},
 }
 
@@ -58,6 +57,6 @@ func init() {
 
 	expectProcessInstanceCmd.Flags().StringVarP(&flagExpectPIKey, "key", "k", "", "process instance key to expect a state for")
 	_ = expectProcessInstanceCmd.MarkFlagRequired("key")
-	expectProcessInstanceCmd.Flags().StringVarP(&flagExpectPIState, "state", "s", "", "state of a process instance: ACTIVE, COMPLETED, CANCELED or ABSENT")
+	expectProcessInstanceCmd.Flags().StringSliceVarP(&flagExpectPIStates, "state", "s", nil, "state of a process instance: ACTIVE, COMPLETED, CANCELED, TERMINATED or ABSENT")
 	_ = expectProcessInstanceCmd.MarkFlagRequired("state")
 }

@@ -1,6 +1,8 @@
 package domain
 
-import "strings"
+import (
+	"strings"
+)
 
 type State string
 
@@ -27,23 +29,29 @@ func (s State) In(states ...State) bool {
 	return false
 }
 
-func ParseState(in string) (State, bool) {
-	switch strings.ToLower(in) {
-	case "all":
-		return StateAll, true
-	case "active":
-		return StateActive, true
-	case "completed":
-		return StateCompleted, true
-	case "canceled", "cancelled":
-		return StateCanceled, true
-	case "terminated":
-		return StateTerminated, true
-	default:
-		return "", false
-	}
-}
-
 func (s State) IsTerminal() bool {
 	return s.In(StateCompleted, StateCanceled, StateTerminated)
+}
+
+type States []State
+
+func (sx States) Contains(state State) bool {
+	for _, s := range sx {
+		if s.EqualsIgnoreCase(state) {
+			return true
+		}
+	}
+	return false
+}
+
+func (sx States) Strings() []string {
+	out := make([]string, len(sx))
+	for i, s := range sx {
+		out[i] = s.String()
+	}
+	return out
+}
+
+func (sx States) String() string {
+	return strings.Join(sx.Strings(), ", ")
 }

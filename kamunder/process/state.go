@@ -1,6 +1,11 @@
 package process
 
-import "strings"
+import (
+	"fmt"
+	"strings"
+
+	"github.com/grafvonb/kamunder/kamunder/errors"
+)
 
 type State string
 
@@ -46,4 +51,39 @@ func ParseState(in string) (State, bool) {
 
 func (s State) IsTerminal() bool {
 	return s.In(StateCompleted, StateCanceled, StateTerminated)
+}
+
+type States []State
+
+func (sx States) Contains(state State) bool {
+	for _, s := range sx {
+		if s.EqualsIgnoreCase(state) {
+			return true
+		}
+	}
+	return false
+}
+
+func (sx States) Strings() []string {
+	out := make([]string, len(sx))
+	for i, s := range sx {
+		out[i] = s.String()
+	}
+	return out
+}
+
+func (sx States) String() string {
+	return strings.Join(sx.Strings(), ", ")
+}
+
+func ParseStates(in []string) (States, error) {
+	var out States
+	for _, s := range in {
+		parsed, ok := ParseState(s)
+		if !ok {
+			return nil, fmt.Errorf("%w: %s", errors.ErrInvalidState, s)
+		}
+		out = append(out, parsed)
+	}
+	return out, nil
 }

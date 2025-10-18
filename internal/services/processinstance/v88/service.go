@@ -120,6 +120,13 @@ func (s *Service) CancelProcessInstance(ctx context.Context, key string, opts ..
 	if err = httpc.HttpStatusErr(resp.HTTPResponse, resp.Body); err != nil {
 		return d.CancelResponse{}, err
 	}
+	if cCfg.Wait {
+		s.log.Info(fmt.Sprintf("waiting for process instance with key %s to be cancelled by workflow engine...", key))
+		states := []d.State{d.StateCanceled, d.StateTerminated}
+		if _, err = state.WaitForProcessInstanceState(ctx, s, s.cfg, s.log, key, states, opts...); err != nil {
+			return d.CancelResponse{}, fmt.Errorf("waiting for canceled state failed for %s: %w", key, err)
+		}
+	}
 	s.log.Info(fmt.Sprintf("process instance with key %s was successfully cancelled", key))
 	return d.CancelResponse{
 		StatusCode: resp.StatusCode(),
@@ -157,14 +164,15 @@ func (s *Service) DeleteProcessInstance(ctx context.Context, key string, opts ..
 	if resp.StatusCode() == http.StatusBadRequest &&
 		resp.ApplicationproblemJSON400 != nil &&
 		*resp.ApplicationproblemJSON400.Message == wrongStateMessage400 {
-		if cCfg.WithCancel {
+		if cCfg.Cancel {
 			s.log.Info(fmt.Sprintf("process instance with key %s not in one of terminated states; cancelling it first", key))
 			_, err = s.CancelProcessInstance(ctx, key)
 			if err != nil {
 				return d.ChangeStatus{}, fmt.Errorf("error cancelling process instance with key %s: %w", key, err)
 			}
 			s.log.Info(fmt.Sprintf("waiting for process instance with key %s to be cancelled by workflow engine...", key))
-			if err = state.WaitForProcessInstanceState(ctx, s, s.cfg, s.log, key, d.StateCanceled, opts...); err != nil {
+			states := []d.State{d.StateCanceled}
+			if _, err = state.WaitForProcessInstanceState(ctx, s, s.cfg, s.log, key, states, opts...); err != nil {
 				return d.ChangeStatus{}, fmt.Errorf("waiting for canceled state failed for %s: %w", key, err)
 			}
 			s.log.Info(fmt.Sprintf("retrying deletion of process instance with key %d", oldKey))
@@ -201,6 +209,6 @@ func (s *Service) GetProcessInstanceByKey(ctx context.Context, key string, opts 
 	return fromProcessInstanceResult(*resp.JSON200), nil
 }
 
-func (s *Service) WaitForProcessInstanceState(ctx context.Context, key string, st d.State, opts ...services.CallOption) error {
-	return state.WaitForProcessInstanceState(ctx, s, s.cfg, s.log, key, st, opts...)
+func (s *Service) WaitForProcessInstanceState(ctx context.Context, key string, desired d.States, opts ...services.CallOption) (d.State, error) {
+	return state.WaitForProcessInstanceState(ctx, s, s.cfg, s.log, key, desired, opts...)
 }

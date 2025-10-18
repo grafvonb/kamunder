@@ -19,7 +19,7 @@ type API interface {
 	GetDirectChildrenOfProcessInstance(ctx context.Context, key string, opts ...options.FacadeOption) (ProcessInstances, error)
 	FilterProcessInstanceWithOrphanParent(ctx context.Context, items []ProcessInstance, opts ...options.FacadeOption) ([]ProcessInstance, error)
 	DeleteProcessInstance(ctx context.Context, key string, opts ...options.FacadeOption) (ChangeStatus, error)
-	WaitForProcessInstanceState(ctx context.Context, key string, desiredState State, opts ...options.FacadeOption) error
+	WaitForProcessInstanceState(ctx context.Context, key string, desired States, opts ...options.FacadeOption) (State, error)
 }
 
 type client struct {
@@ -99,6 +99,7 @@ func (c *client) DeleteProcessInstance(ctx context.Context, key string, opts ...
 	return ChangeStatus{Deleted: s.Deleted, Message: s.Message}, nil
 }
 
-func (c *client) WaitForProcessInstanceState(ctx context.Context, key string, desiredState State, opts ...options.FacadeOption) error {
-	return c.piApi.WaitForProcessInstanceState(ctx, key, d.State(desiredState), options.MapFacadeOptionsToCallOptions(opts)...)
+func (c *client) WaitForProcessInstanceState(ctx context.Context, key string, desired States, opts ...options.FacadeOption) (State, error) {
+	got, err := c.piApi.WaitForProcessInstanceState(ctx, key, toolx.MapSlice(desired, func(s State) d.State { return d.State(s) }), options.MapFacadeOptionsToCallOptions(opts)...)
+	return State(got), err
 }

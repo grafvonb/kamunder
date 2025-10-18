@@ -17,10 +17,10 @@ type PIGetter interface {
 	GetProcessInstanceStateByKey(ctx context.Context, key string, opts ...services.CallOption) (d.State, error)
 }
 
-// WaitForProcessInstanceState waits until the instance reaches the desired state.
+// WaitForProcessInstanceState waits until the instance reaches one of the desired states.
 // - Respects ctx cancellation/deadline; augments with cfg.Timeout if set
 // - Returns nil on success or an error on failure/timeout.
-func WaitForProcessInstanceState(ctx context.Context, s PIGetter, cfg *config.Config, log *slog.Logger, key string, desiredState d.State, opts ...services.CallOption) error {
+func WaitForProcessInstanceState(ctx context.Context, s PIGetter, cfg *config.Config, log *slog.Logger, key string, desired d.States, opts ...services.CallOption) (d.State, error) {
 	_ = services.ApplyCallOptions(opts)
 	backoff := cfg.App.Backoff
 	if backoff.Timeout > 0 {
@@ -36,16 +36,20 @@ func WaitForProcessInstanceState(ctx context.Context, s PIGetter, cfg *config.Co
 	delay := backoff.InitialDelay
 	for {
 		if errInDelay := ctx.Err(); errInDelay != nil {
-			return errInDelay
+			return "", errInDelay
 		}
 		attempts++
-		st, errInDelay := s.GetProcessInstanceStateByKey(ctx, key)
+		got, errInDelay := s.GetProcessInstanceStateByKey(ctx, key)
 		if errInDelay == nil {
-			if st.EqualsIgnoreCase(desiredState) {
-				log.Debug(fmt.Sprintf("process instance %s reached desired state %s", key, desiredState))
-				return nil
+			if stateIn(got, desired) {
+				if attempts == 1 {
+					log.Debug(fmt.Sprintf("process instance %s is already in one of the desired state(s) [%s] (current: %s)", key, desired, got))
+					return got, nil
+				}
+				log.Debug(fmt.Sprintf("process instance %s reached one of the desired state(s) [%s] (current: %s) after %d checks", key, desired, got, attempts))
+				return got, nil
 			}
-			log.Debug(fmt.Sprintf("process instance %s currently in state %s; waiting...", key, st))
+			log.Info(fmt.Sprintf("process instance %s currently in state %s; waiting...", key, got))
 		} else if errInDelay != nil {
 			if strings.Contains(errInDelay.Error(), "status 404") {
 				log.Debug(fmt.Sprintf("process instance %s is absent (not found); waiting...", key))
@@ -54,13 +58,22 @@ func WaitForProcessInstanceState(ctx context.Context, s PIGetter, cfg *config.Co
 			}
 		}
 		if backoff.MaxRetries > 0 && attempts >= backoff.MaxRetries {
-			return fmt.Errorf("exceeded max_retries (%d) waiting for state %q", backoff.MaxRetries, desiredState)
+			return "", fmt.Errorf("exceeded max_retries (%d) waiting for state %q", backoff.MaxRetries, desired)
 		}
 		select {
 		case <-time.After(delay):
 			delay = backoff.NextDelay(delay)
 		case <-ctx.Done():
-			return ctx.Err()
+			return "", ctx.Err()
 		}
 	}
+}
+
+func stateIn(st d.State, set d.States) bool {
+	for _, x := range set {
+		if st.EqualsIgnoreCase(x) {
+			return true
+		}
+	}
+	return false
 }

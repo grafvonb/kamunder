@@ -4,6 +4,10 @@ import (
 	"github.com/spf13/cobra"
 )
 
+var (
+	flagCancelWait bool
+)
+
 var cancelCmd = &cobra.Command{
 	Use:     "cancel",
 	Short:   "Cancel resources",
@@ -16,4 +20,6 @@ var cancelCmd = &cobra.Command{
 
 func init() {
 	rootCmd.AddCommand(cancelCmd)
+
+	cancelCmd.PersistentFlags().BoolVarP(&flagCancelWait, "wait", "w", false, "wait for the cancellation to be completed")
 }

@@ -17,7 +17,7 @@ type API interface {
 	CancelProcessInstance(ctx context.Context, key string, opts ...services.CallOption) (d.CancelResponse, error)
 	DeleteProcessInstance(ctx context.Context, key string, opts ...services.CallOption) (d.ChangeStatus, error)
 	GetProcessInstanceStateByKey(ctx context.Context, key string, opts ...services.CallOption) (d.State, error)
-	WaitForProcessInstanceState(ctx context.Context, key string, state d.State, opts ...services.CallOption) error
+	WaitForProcessInstanceState(ctx context.Context, key string, desired d.States, opts ...services.CallOption) (d.State, error)
 }
 
 var _ API = (*v87.Service)(nil)
