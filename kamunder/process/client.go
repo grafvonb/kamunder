@@ -6,6 +6,7 @@ import (
 	d "github.com/grafvonb/kamunder/internal/domain"
 	pdsvc "github.com/grafvonb/kamunder/internal/services/processdefinition"
 	pisvc "github.com/grafvonb/kamunder/internal/services/processinstance"
+	"github.com/grafvonb/kamunder/kamunder/ferrors"
 	"github.com/grafvonb/kamunder/kamunder/options"
 	"github.com/grafvonb/kamunder/toolx"
 )
@@ -37,7 +38,7 @@ func New(pdApi pdsvc.API, piApi pisvc.API) API {
 func (c *client) GetProcessDefinitionByKey(ctx context.Context, key string, opts ...options.FacadeOption) (ProcessDefinition, error) {
 	pd, err := c.pdApi.GetProcessDefinitionByKey(ctx, key, options.MapFacadeOptionsToCallOptions(opts)...)
 	if err != nil {
-		return ProcessDefinition{}, err
+		return ProcessDefinition{}, ferrors.FromDomain(err)
 	}
 	return fromDomainProcessDefinition(pd), nil
 }
@@ -45,7 +46,7 @@ func (c *client) GetProcessDefinitionByKey(ctx context.Context, key string, opts
 func (c *client) SearchProcessDefinitions(ctx context.Context, filter ProcessDefinitionSearchFilterOpts, size int32, opts ...options.FacadeOption) (ProcessDefinitions, error) {
 	pds, err := c.pdApi.SearchProcessDefinitions(ctx, toDomainProcessDefinitionFilter(filter), size, options.MapFacadeOptionsToCallOptions(opts)...)
 	if err != nil {
-		return ProcessDefinitions{}, err
+		return ProcessDefinitions{}, ferrors.FromDomain(err)
 	}
 	return fromDomainProcessDefinitions(pds), nil
 }
@@ -53,7 +54,7 @@ func (c *client) SearchProcessDefinitions(ctx context.Context, filter ProcessDef
 func (c *client) GetProcessInstanceByKey(ctx context.Context, key string, opts ...options.FacadeOption) (ProcessInstance, error) {
 	pi, err := c.piApi.GetProcessInstanceByKey(ctx, key, options.MapFacadeOptionsToCallOptions(opts)...)
 	if err != nil {
-		return ProcessInstance{}, err
+		return ProcessInstance{}, ferrors.FromDomain(err)
 	}
 	return fromDomainProcessInstance(pi), nil
 }
@@ -61,7 +62,7 @@ func (c *client) GetProcessInstanceByKey(ctx context.Context, key string, opts .
 func (c *client) SearchForProcessInstances(ctx context.Context, filter ProcessInstanceSearchFilterOpts, size int32, opts ...options.FacadeOption) (ProcessInstances, error) {
 	pis, err := c.piApi.SearchForProcessInstances(ctx, toDomainProcessInstanceFilter(filter), size, options.MapFacadeOptionsToCallOptions(opts)...)
 	if err != nil {
-		return ProcessInstances{}, err
+		return ProcessInstances{}, ferrors.FromDomain(err)
 	}
 	return fromDomainProcessInstances(pis), nil
 }
@@ -69,7 +70,7 @@ func (c *client) SearchForProcessInstances(ctx context.Context, filter ProcessIn
 func (c *client) CancelProcessInstance(ctx context.Context, key string, opts ...options.FacadeOption) (CancelResponse, error) {
 	resp, err := c.piApi.CancelProcessInstance(ctx, key, options.MapFacadeOptionsToCallOptions(opts)...)
 	if err != nil {
-		return CancelResponse{}, err
+		return CancelResponse{}, ferrors.FromDomain(err)
 	}
 	return CancelResponse{StatusCode: resp.StatusCode, Status: resp.Status}, nil
 }
@@ -77,7 +78,7 @@ func (c *client) CancelProcessInstance(ctx context.Context, key string, opts ...
 func (c *client) GetDirectChildrenOfProcessInstance(ctx context.Context, key string, opts ...options.FacadeOption) (ProcessInstances, error) {
 	children, err := c.piApi.GetDirectChildrenOfProcessInstance(ctx, key, options.MapFacadeOptionsToCallOptions(opts)...)
 	if err != nil {
-		return ProcessInstances{}, err
+		return ProcessInstances{}, ferrors.FromDomain(err)
 	}
 	return fromDomainProcessInstances(children), nil
 }
@@ -86,7 +87,7 @@ func (c *client) FilterProcessInstanceWithOrphanParent(ctx context.Context, item
 	in := toolx.MapSlice(items, toDomainProcessInstance)
 	out, err := c.piApi.FilterProcessInstanceWithOrphanParent(ctx, in, options.MapFacadeOptionsToCallOptions(opts)...)
 	if err != nil {
-		return nil, err
+		return nil, ferrors.FromDomain(err)
 	}
 	return toolx.MapSlice(out, fromDomainProcessInstance), nil
 }
@@ -94,12 +95,12 @@ func (c *client) FilterProcessInstanceWithOrphanParent(ctx context.Context, item
 func (c *client) DeleteProcessInstance(ctx context.Context, key string, opts ...options.FacadeOption) (ChangeStatus, error) {
 	s, err := c.piApi.DeleteProcessInstance(ctx, key, options.MapFacadeOptionsToCallOptions(opts)...)
 	if err != nil {
-		return ChangeStatus{}, err
+		return ChangeStatus{}, ferrors.FromDomain(err)
 	}
 	return ChangeStatus{Deleted: s.Deleted, Message: s.Message}, nil
 }
 
 func (c *client) WaitForProcessInstanceState(ctx context.Context, key string, desired States, opts ...options.FacadeOption) (State, error) {
 	got, err := c.piApi.WaitForProcessInstanceState(ctx, key, toolx.MapSlice(desired, func(s State) d.State { return d.State(s) }), options.MapFacadeOptionsToCallOptions(opts)...)
-	return State(got), err
+	return State(got), ferrors.FromDomain(err)
 }

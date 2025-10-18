@@ -20,6 +20,7 @@ var (
 	flagShowConfig bool
 	//nolint:unused
 	flagAsJson bool
+	flagQuiet  bool
 )
 
 var rootCmd = &cobra.Command{
@@ -54,6 +55,9 @@ var rootCmd = &cobra.Command{
 		}
 		ctx := cfg.ToContext(cmd.Context())
 
+		if flagQuiet {
+			v.Set("log.level", "error")
+		}
 		log := logging.New(logging.LoggerConfig{
 			Level:      v.GetString("log.level"),
 			Format:     v.GetString("log.format"),
@@ -99,6 +103,7 @@ func Execute() {
 
 func init() {
 	pf := rootCmd.PersistentFlags()
+	pf.BoolVarP(&flagQuiet, "quiet", "q", false, "suppress all output, except errors")
 
 	pf.String("config", "", "path to config file")
 

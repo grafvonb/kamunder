@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/grafvonb/kamunder/kamunder"
+	"github.com/grafvonb/kamunder/kamunder/ferrors"
 	"github.com/grafvonb/kamunder/kamunder/process"
 	"github.com/grafvonb/kamunder/toolx/logging"
 	"github.com/spf13/cobra"
@@ -31,8 +32,7 @@ var getProcessDefinitionCmd = &cobra.Command{
 		log := logging.FromContext(cmd.Context())
 		svcs, err := NewFromContext(cmd.Context())
 		if err != nil {
-			log.Error(fmt.Sprintf("%v", err))
-			return
+			ferrors.HandleAndExit(log, fmt.Errorf("error getting services from context: %w", err))
 		}
 		cli, err := kamunder.New(
 			kamunder.WithConfig(svcs.Config),
@@ -40,8 +40,7 @@ var getProcessDefinitionCmd = &cobra.Command{
 			kamunder.WithLogger(log),
 		)
 		if err != nil {
-			log.Error(fmt.Sprintf("error creating kamunder client: %v", err))
-			return
+			ferrors.HandleAndExit(log, fmt.Errorf("error creating kamunder client: %w", err))
 		}
 
 		log.Debug("fetching process definitions")
@@ -50,34 +49,30 @@ var getProcessDefinitionCmd = &cobra.Command{
 			log.Debug(fmt.Sprintf("searching by key: %s", searchFilterOpts.Key))
 			pd, err := cli.GetProcessDefinitionByKey(cmd.Context(), searchFilterOpts.Key)
 			if err != nil {
-				log.Error(fmt.Sprintf("error fetching process definition by key %s: %v", searchFilterOpts.Key, err))
-				return
+				ferrors.HandleAndExit(log, fmt.Errorf("error fetching process definition by key %s: %w", searchFilterOpts.Key, err))
 			}
 			err = processDefinitionView(cmd, pd)
 			if err != nil {
-				log.Error(fmt.Sprintf("error rendering key-only view: %v", err))
-				return
+				ferrors.HandleAndExit(log, fmt.Errorf("error rendering key-only view: %w", err))
 			}
 		} else {
 			log.Debug(fmt.Sprintf("searching by filter: %v", searchFilterOpts))
 			pds, err := cli.SearchProcessDefinitions(cmd.Context(), searchFilterOpts, maxPDSearchSize)
 			if err != nil {
-				log.Error(fmt.Sprintf("error fetching process definitions: %v", err))
-				return
+				ferrors.HandleAndExit(log, fmt.Errorf("error fetching process definitions: %w", err))
 			}
 			if flagPDKeysOnly {
 				err = listKeyOnlyProcessDefinitionsView(cmd, pds)
 				if err != nil {
-					log.Error(fmt.Sprintf("error rendering keys-only view: %v", err))
+					ferrors.HandleAndExit(log, fmt.Errorf("error rendering keys-only view: %w", err))
 				}
 				return
 			}
 			err = listProcessDefinitionsView(cmd, pds)
 			if err != nil {
-				log.Error(fmt.Sprintf("error rendering items view: %v", err))
+				ferrors.HandleAndExit(log, fmt.Errorf("error rendering items view: %w", err))
 			}
 		}
-
 	},
 }
 

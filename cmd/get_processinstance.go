@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/grafvonb/kamunder/kamunder"
+	"github.com/grafvonb/kamunder/kamunder/ferrors"
 	"github.com/grafvonb/kamunder/kamunder/process"
 	"github.com/grafvonb/kamunder/toolx/logging"
 	"github.com/spf13/cobra"
@@ -43,8 +44,7 @@ var getProcessInstanceCmd = &cobra.Command{
 		log := logging.FromContext(cmd.Context())
 		svcs, err := NewFromContext(cmd.Context())
 		if err != nil {
-			log.Error(fmt.Sprintf("%v", err))
-			return
+			ferrors.HandleAndExit(log, fmt.Errorf("error getting services from context: %w", err))
 		}
 		cli, err := kamunder.New(
 			kamunder.WithConfig(svcs.Config),
@@ -52,8 +52,7 @@ var getProcessInstanceCmd = &cobra.Command{
 			kamunder.WithLogger(log),
 		)
 		if err != nil {
-			log.Error(fmt.Sprintf("error creating kamunder client: %v", err))
-			return
+			ferrors.HandleAndExit(log, fmt.Errorf("error creating kamunder client: %w", err))
 		}
 
 		log.Debug("fetching process instances")
@@ -63,25 +62,21 @@ var getProcessInstanceCmd = &cobra.Command{
 			log.Debug(fmt.Sprintf("searching by key: %s", searchFilterOpts.Key))
 			pi, err := cli.GetProcessInstanceByKey(cmd.Context(), searchFilterOpts.Key)
 			if err != nil {
-				log.Error(fmt.Sprintf("error fetching process instance by key %s: %v", searchFilterOpts.Key, err))
-				return
+				ferrors.HandleAndExit(log, fmt.Errorf("error fetching process instance by key %s: %w", searchFilterOpts.Key, err))
 			}
 			err = processInstanceView(cmd, pi)
 			if err != nil {
-				log.Error(fmt.Sprintf("error rendering key-only view: %v", err))
-				return
+				ferrors.HandleAndExit(log, fmt.Errorf("error rendering key-only view: %w", err))
 			}
 			log.Debug(fmt.Sprintf("searched by key, found process instance with key: %s", pi.Key))
 		} else {
 			log.Debug(fmt.Sprintf("searching by filter: %v", searchFilterOpts))
 			pisr, err := cli.SearchForProcessInstances(cmd.Context(), searchFilterOpts, maxPISearchSize)
 			if err != nil {
-				log.Error(fmt.Sprintf("error fetching process instances: %v", err))
-				return
+				ferrors.HandleAndExit(log, fmt.Errorf("error fetching process instances: %w", err))
 			}
 			if flagPIChildrenOnly && flagPIParentsOnly {
-				log.Error("using both --children-only and --parents-only filters returns always no results")
-				return
+				ferrors.HandleAndExit(log, fmt.Errorf("%w: using both --children-only and --parents-only filters returns always no results", ferrors.ErrBadRequest))
 			}
 			if flagPIChildrenOnly {
 				pisr = pisr.FilterChildrenOnly()
@@ -92,8 +87,7 @@ var getProcessInstanceCmd = &cobra.Command{
 			if flagPIOrphanParentsOnly {
 				pisr.Items, err = cli.FilterProcessInstanceWithOrphanParent(cmd.Context(), pisr.Items)
 				if err != nil {
-					log.Error(fmt.Sprintf("error filtering orphan parents: %v", err))
-					return
+					ferrors.HandleAndExit(log, fmt.Errorf("error filtering orphan parents: %w", err))
 				}
 			}
 			if flagPIIncidentsOnly {
@@ -105,13 +99,13 @@ var getProcessInstanceCmd = &cobra.Command{
 			if flagPIKeysOnly {
 				err = listKeyOnlyProcessInstancesView(cmd, pisr)
 				if err != nil {
-					log.Error(fmt.Sprintf("error rendering keys-only view: %v", err))
+					ferrors.HandleAndExit(log, fmt.Errorf("error rendering keys-only view: %w", err))
 				}
 				return
 			}
 			err = listProcessInstancesView(cmd, pisr)
 			if err != nil {
-				log.Error(fmt.Sprintf("error rendering items view: %v", err))
+				ferrors.HandleAndExit(log, fmt.Errorf("error rendering items view: %w", err))
 			}
 			log.Debug(fmt.Sprintf("fetched process instances: %d", pisr.Total))
 		}

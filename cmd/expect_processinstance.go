@@ -2,8 +2,11 @@ package cmd
 
 import (
 	"fmt"
+	"os"
 
+	"github.com/grafvonb/kamunder/internal/exitcode"
 	"github.com/grafvonb/kamunder/kamunder"
+	"github.com/grafvonb/kamunder/kamunder/ferrors"
 	"github.com/grafvonb/kamunder/kamunder/process"
 	"github.com/grafvonb/kamunder/toolx/logging"
 	"github.com/spf13/cobra"
@@ -23,8 +26,7 @@ var expectProcessInstanceCmd = &cobra.Command{
 		log := logging.FromContext(cmd.Context())
 		svcs, err := NewFromContext(cmd.Context())
 		if err != nil {
-			log.Error(fmt.Sprintf("%v", err))
-			return
+			ferrors.HandleAndExit(log, fmt.Errorf("error getting services from context: %w", err))
 		}
 		cli, err := kamunder.New(
 			kamunder.WithConfig(svcs.Config),
@@ -32,19 +34,17 @@ var expectProcessInstanceCmd = &cobra.Command{
 			kamunder.WithLogger(log),
 		)
 		if err != nil {
-			log.Error(fmt.Sprintf("error creating kamunder client: %v", err))
-			return
+			ferrors.HandleAndExit(log, fmt.Errorf("error creating kamunder client: %w", err))
 		}
 		states, err := process.ParseStates(flagExpectPIStates)
 		if err != nil {
 			log.Error(fmt.Sprintf("error parsing states: %v", err))
-			return
+			os.Exit(exitcode.NotFound)
 		}
 		log.Info(fmt.Sprintf("waiting for process instance %s to reach one of the states [%s]", flagExpectPIKey, states))
 		got, err := cli.WaitForProcessInstanceState(cmd.Context(), flagExpectPIKey, states, collectOptions()...)
 		if err != nil {
-			log.Error(fmt.Sprintf("error waiting for a process instance %s to reach one of states [%s] : %v", flagExpectPIKey, states, err))
-			return
+			ferrors.HandleAndExit(log, fmt.Errorf("cancelling process instance: %w", err))
 		}
 		log.Info(fmt.Sprintf("process instance %s reached desired state %s", flagExpectPIKey, got))
 	},

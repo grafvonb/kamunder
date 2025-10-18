@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/grafvonb/kamunder/kamunder"
+	"github.com/grafvonb/kamunder/kamunder/ferrors"
 	"github.com/grafvonb/kamunder/toolx/logging"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -17,8 +18,7 @@ var getClusterTopologyCmd = &cobra.Command{
 		log := logging.FromContext(cmd.Context())
 		svcs, err := NewFromContext(cmd.Context())
 		if err != nil {
-			log.Error(fmt.Sprintf("%v", err))
-			return
+			ferrors.HandleAndExit(log, fmt.Errorf("error getting services from context: %w", err))
 		}
 		cli, err := kamunder.New(
 			kamunder.WithConfig(svcs.Config),
@@ -26,15 +26,13 @@ var getClusterTopologyCmd = &cobra.Command{
 			kamunder.WithLogger(log),
 		)
 		if err != nil {
-			log.Error(fmt.Sprintf("error creating kamunder client: %v", err))
-			return
+			ferrors.HandleAndExit(log, fmt.Errorf("error creating kamunder client: %w", err))
 		}
 
 		log.Debug("fetching cluster topology")
 		topology, err := cli.GetClusterTopology(cmd.Context())
 		if err != nil {
-			log.Error(fmt.Sprintf("error fetching topology: %v", err))
-			return
+			ferrors.HandleAndExit(log, fmt.Errorf("error fetching topology: %w", err))
 		}
 		cmd.Println(ToJSONString(topology))
 	},

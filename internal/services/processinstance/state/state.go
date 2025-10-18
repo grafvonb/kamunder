@@ -64,7 +64,7 @@ func WaitForProcessInstanceState(ctx context.Context, s PIGetter, cfg *config.Co
 		case <-time.After(delay):
 			delay = backoff.NextDelay(delay)
 		case <-ctx.Done():
-			return "", ctx.Err()
+			return "", fmt.Errorf("%w: %s", d.ErrGatewayTimeout, ctx.Err().Error())
 		}
 	}
 }

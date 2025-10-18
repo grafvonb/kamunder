@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/grafvonb/kamunder/kamunder/errors"
+	"github.com/grafvonb/kamunder/kamunder/ferrors"
 )
 
 type State string
@@ -81,7 +81,7 @@ func ParseStates(in []string) (States, error) {
 	for _, s := range in {
 		parsed, ok := ParseState(s)
 		if !ok {
-			return nil, fmt.Errorf("%w: %s", errors.ErrInvalidState, s)
+			return nil, fmt.Errorf("%w: %s", ferrors.ErrInvalidState, s)
 		}
 		out = append(out, parsed)
 	}

@@ -4,10 +4,7 @@ import (
 	"errors"
 )
 
-// Sentinel errors
 var (
-	ErrMultipleMatches = errors.New("multiple matches found")
-
 	ErrBadRequest        = errors.New("bad request")
 	ErrUnauthorized      = errors.New("unauthorized")
 	ErrForbidden         = errors.New("forbidden")
@@ -22,6 +19,4 @@ var (
 	ErrUpstream          = errors.New("upstream error")
 	ErrInternal          = errors.New("internal error")
 	ErrMalformedResponse = errors.New("malformed response")
-
-	ErrUnknownStateFilter = errors.New("is unknown (valid: all, active, canceled, completed)")
 )

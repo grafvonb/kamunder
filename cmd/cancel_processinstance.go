@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/grafvonb/kamunder/kamunder"
+	"github.com/grafvonb/kamunder/kamunder/ferrors"
 	"github.com/grafvonb/kamunder/toolx/logging"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -22,8 +23,7 @@ var cancelProcessInstanceCmd = &cobra.Command{
 		log := logging.FromContext(cmd.Context())
 		svcs, err := NewFromContext(cmd.Context())
 		if err != nil {
-			log.Error(fmt.Sprintf("%v", err))
-			return
+			ferrors.HandleAndExit(log, fmt.Errorf("error getting services from context: %w", err))
 		}
 		cli, err := kamunder.New(
 			kamunder.WithConfig(svcs.Config),
@@ -31,14 +31,12 @@ var cancelProcessInstanceCmd = &cobra.Command{
 			kamunder.WithLogger(log),
 		)
 		if err != nil {
-			log.Error(fmt.Sprintf("error creating kamunder client: %v", err))
-			return
+			ferrors.HandleAndExit(log, fmt.Errorf("error creating kamunder client: %w", err))
 		}
 
 		_, err = cli.CancelProcessInstance(cmd.Context(), flagCancelPIKey, collectOptions()...)
 		if err != nil {
-			log.Error(fmt.Sprintf("cancelling process instance: %v", err))
-			return
+			ferrors.HandleAndExit(log, fmt.Errorf("cancelling process instance: %w", err))
 		}
 	},
 }
