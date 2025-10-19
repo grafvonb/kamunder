@@ -30,7 +30,7 @@ var rootCmd = &cobra.Command{
 		if err := initViper(v, cmd); err != nil {
 			return err
 		}
-		if isUtilityCommand(cmd) || hasHelpFlag(cmd) {
+		if hasHelpFlag(cmd) {
 			return nil
 		}
 
@@ -55,9 +55,14 @@ var rootCmd = &cobra.Command{
 		} else {
 			log.Debug("no config file loaded, using defaults and environment variables")
 		}
+		if isUtilityCommand(cmd) {
+			cmd.SetContext(ctx)
+			return nil
+		}
+
 		if err = cfg.Validate(); err != nil {
 			return fmt.Errorf("validate config:\n%w", err)
-		}
+		}q
 
 		httpSvc, err := httpc.New(cfg, log, httpc.WithCookieJar())
 		if err != nil {
@@ -72,7 +77,6 @@ var rootCmd = &cobra.Command{
 		}
 		httpSvc.InstallAuthEditor(ator.Editor())
 		ctx = httpSvc.ToContext(ctx)
-
 		ctx = authenticator.ToContext(ctx, ator)
 		cmd.SetContext(ctx)
 
