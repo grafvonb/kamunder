@@ -75,7 +75,7 @@ func (s *Service) FilterProcessInstanceWithOrphanParent(ctx context.Context, ite
 			continue
 		}
 		_, err := s.GetProcessInstanceByKey(ctx, it.ParentKey)
-		if err != nil && strings.Contains(err.Error(), "status 404") {
+		if err != nil && strings.Contains(err.Error(), "404") {
 			result = append(result, it)
 		} else if err != nil {
 			return nil, err
