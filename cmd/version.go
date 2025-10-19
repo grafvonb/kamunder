@@ -11,7 +11,6 @@ var (
 	date    = "unknown"
 )
 
-// versionCmd represents the version command
 var versionCmd = &cobra.Command{
 	Use:   "version",
 	Short: "Print version information",

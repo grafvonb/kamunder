@@ -19,7 +19,7 @@ var (
 
 var getProcessDefinitionCmd = &cobra.Command{
 	Use:     "process-definition",
-	Short:   "Get deployed process definitions.",
+	Short:   "Get deployed process definitions",
 	Aliases: []string{"processdefinition", "processdefinitions", "pd", "pds"},
 	Run: func(cmd *cobra.Command, args []string) {
 		cli, log, err := NewCli(cmd)

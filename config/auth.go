@@ -16,9 +16,9 @@ const (
 )
 
 type Auth struct {
-	Mode   AuthMode                    `mapstructure:"mode"`
-	OAuth2 AuthOAuth2ClientCredentials `mapstructure:"oauth2"`
-	Cookie AuthCookieSession           `mapstructure:"cookie"`
+	Mode   AuthMode                    `mapstructure:"mode" json:"mode" yaml:"mode"`
+	OAuth2 AuthOAuth2ClientCredentials `mapstructure:"oauth2" json:"oauth2" yaml:"oauth2"`
+	Cookie AuthCookieSession           `mapstructure:"cookie" json:"cookie" yaml:"cookie"`
 }
 
 func (c *Auth) Validate() error {
@@ -40,15 +40,14 @@ func (c *Auth) Validate() error {
 	return errors.Join(errs...)
 }
 
-type AuthOAuth2ClientCredentials struct {
-	TokenURL     string            `mapstructure:"token_url"`
-	ClientID     string            `mapstructure:"client_id"`
-	ClientSecret string            `mapstructure:"client_secret"`
-	Scopes       map[string]string `mapstructure:"scopes"`
-}
+type Scopes map[string]string
 
-var allowedScopeKeys = map[string]struct{}{CamundaApiKeyConst: {}, OperateApiKeyConst: {}, TasklistApiKeyConst: {}}
-var allowedScopeKeysList = []string{CamundaApiKeyConst, OperateApiKeyConst, TasklistApiKeyConst}
+type AuthOAuth2ClientCredentials struct {
+	TokenURL     string `mapstructure:"token_url" json:"token_url" yaml:"token_url"`
+	ClientID     string `mapstructure:"client_id" json:"client_id" yaml:"client_id"`
+	ClientSecret string `mapstructure:"client_secret" json:"client_secret" yaml:"client_secret"`
+	Scopes       Scopes `mapstructure:"scopes" json:"scopes" yaml:"scopes"`
+}
 
 func (a *AuthOAuth2ClientCredentials) Validate() error {
 	var errs []error
@@ -62,22 +61,6 @@ func (a *AuthOAuth2ClientCredentials) Validate() error {
 	if strings.TrimSpace(a.ClientSecret) == "" {
 		errs = append(errs, ErrNoClientSecret)
 	}
-
-	if len(a.Scopes) > 0 {
-		for k := range a.Scopes {
-			key := strings.TrimSpace(k)
-			if key == "" {
-				errs = append(errs, fmt.Errorf("auth.scopes contains an empty key (allowed keys: %s)",
-					strings.Join(allowedScopeKeysList, ", ")))
-				continue
-			}
-			if _, ok := allowedScopeKeys[key]; !ok {
-				errs = append(errs, fmt.Errorf("auth.scopes[%s]: unsupported key (allowed keys: %s)",
-					k, strings.Join(allowedScopeKeysList, ", ")))
-			}
-		}
-	}
-
 	return errors.Join(errs...)
 }
 
@@ -89,15 +72,15 @@ func (a *AuthOAuth2ClientCredentials) Scope(key string) string {
 }
 
 type AuthCookieSession struct {
-	BaseURL  string `mapstructure:"base_url"`
-	Username string `mapstructure:"username"`
-	Password string `mapstructure:"password"`
+	BaseURL  string `mapstructure:"base_url" json:"base_url" yaml:"base_url"`
+	Username string `mapstructure:"username" json:"username" yaml:"username"`
+	Password string `mapstructure:"password" json:"password" yaml:"password"`
 }
 
 func (c *AuthCookieSession) Validate() error {
 	var errs []error
 	if strings.TrimSpace(c.BaseURL) == "" {
-		errs = append(errs, errors.New("no base_url provided in cookie auth configuration"))
+		errs = append(errs, fmt.Errorf("auth.cookie.base_url: %w", ErrNoBaseURL))
 	}
 	return errors.Join(errs...)
 }

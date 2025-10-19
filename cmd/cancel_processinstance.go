@@ -14,7 +14,7 @@ var (
 
 var cancelProcessInstanceCmd = &cobra.Command{
 	Use:     "process-instance",
-	Short:   "Cancel a process instance by its key.",
+	Short:   "Cancel a process instance by its key",
 	Aliases: []string{"pi"},
 	Run: func(cmd *cobra.Command, args []string) {
 		cli, log, err := NewCli(cmd)

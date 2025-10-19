@@ -42,6 +42,11 @@ func FromDomain(err error) error {
 	}
 }
 
+func HandleAndExitOK(log *slog.Logger, message string) {
+	log.Info(message)
+	os.Exit(exitcode.OK)
+}
+
 func HandleAndExit(log *slog.Logger, err error) {
 	if err == nil {
 		os.Exit(exitcode.OK)

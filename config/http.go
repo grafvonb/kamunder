@@ -6,7 +6,7 @@ import (
 )
 
 type HTTP struct {
-	Timeout string `mapstructure:"timeout"` // Go duration string, e.g., "30s"
+	Timeout string `mapstructure:"timeout" json:"timeout" yaml:"timeout"`
 }
 
 func (h *HTTP) Validate() error {

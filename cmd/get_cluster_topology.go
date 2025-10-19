@@ -9,7 +9,7 @@ import (
 
 var getClusterTopologyCmd = &cobra.Command{
 	Use:     "cluster-topology",
-	Short:   "Get the cluster topology of the connected Camunda 8 cluster.",
+	Short:   "Get the cluster topology of the connected Camunda 8 cluster",
 	Aliases: []string{"ct", "cluster-info", "ci"},
 	Run: func(cmd *cobra.Command, args []string) {
 		cli, log, err := NewCli(cmd)

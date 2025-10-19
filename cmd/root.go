@@ -17,7 +17,6 @@ import (
 )
 
 var (
-	flagShowConfig   bool
 	flagViewAsJson   bool
 	flagViewKeysOnly bool
 	flagQuiet        bool
@@ -25,31 +24,17 @@ var (
 
 var rootCmd = &cobra.Command{
 	Use:   "kamunder",
-	Short: "Kamunder is a CLI tool to interact with Camunda 8.",
+	Short: "Kamunder is a CLI tool to interact with Camunda 8",
 	PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
 		v := viper.New()
 		if err := initViper(v, cmd); err != nil {
 			return err
 		}
-
-		if flagShowConfig {
-			cfg, err := retrieveConfig(v, false)
-			if err != nil {
-				return err
-			}
-			if p := v.ConfigFileUsed(); p != "" {
-				cmd.Println("config loaded:", p)
-			}
-			cmd.Println(cfg.String())
-			os.Exit(0)
-			return nil
-		}
-
 		if isUtilityCommand(cmd) || hasHelpFlag(cmd) {
 			return nil
 		}
 
-		cfg, err := retrieveConfig(v, true)
+		cfg, err := retrieveAndNormalizeConfig(v)
 		if err != nil {
 			return err
 		}
@@ -67,6 +52,11 @@ var rootCmd = &cobra.Command{
 
 		if pathcfg := v.ConfigFileUsed(); pathcfg != "" {
 			log.Debug("config loaded: " + pathcfg)
+		} else {
+			log.Debug("no config file loaded, using defaults and environment variables")
+		}
+		if err = cfg.Validate(); err != nil {
+			return fmt.Errorf("validate config:\n%w", err)
 		}
 
 		httpSvc, err := httpc.New(cfg, log, httpc.WithCookieJar())
@@ -115,10 +105,14 @@ func init() {
 
 	pf.String("tenant", "", "default tenant ID")
 
-	pf.String("auth-token-url", "", "auth token URL")
-	pf.String("auth-client-id", "", "auth client ID")
-	pf.String("auth-client-secret", "", "auth client secret")
-	pf.StringToString("auth-scopes", nil, "auth scopes as key=value (repeatable or comma-separated)")
+	pf.String("auth-mode", "oauth2", "authentication mode (oauth2, cookie)")
+	pf.String("auth-oauth2-client-id", "", "auth client ID")
+	pf.String("auth-oauth2-client-secret", "", "auth client secret")
+	pf.String("auth-oauth2-token-url", "", "auth token URL")
+	pf.StringToString("auth-oauth2-scopes", nil, "auth scopes as key=value (repeatable or comma-separated)")
+	pf.String("auth-cookie-base-url", "", "auth cookie base URL")
+	pf.String("auth-cookie-username", "", "auth cookie username")
+	pf.String("auth-cookie-password", "", "auth cookie password")
 
 	pf.String("http-timeout", "", "HTTP timeout (Go duration, e.g. 30s)")
 
@@ -126,8 +120,6 @@ func init() {
 	pf.String("api-camunda-base-url", "", "Camunda API base URL")
 	pf.String("api-operate-base-url", "", "Operate API base URL")
 	pf.String("api-tasklist-base-url", "", "Tasklist API base URL")
-
-	pf.BoolVar(&flagShowConfig, "show-config", false, "print effective config (secrets redacted)")
 }
 
 func initViper(v *viper.Viper, cmd *cobra.Command) error {
@@ -141,10 +133,14 @@ func initViper(v *viper.Viper, cmd *cobra.Command) error {
 
 	_ = v.BindPFlag("app.tenant", fs.Lookup("tenant"))
 
-	_ = v.BindPFlag("auth.token_url", fs.Lookup("auth-token-url"))
-	_ = v.BindPFlag("auth.client_id", fs.Lookup("auth-client-id"))
-	_ = v.BindPFlag("auth.client_secret", fs.Lookup("auth-client-secret"))
-	_ = v.BindPFlag("tmp.auth_scopes", fs.Lookup("auth-scopes"))
+	_ = v.BindPFlag("auth.mode", fs.Lookup("auth-mode"))
+	_ = v.BindPFlag("auth.oauth2.client_id", fs.Lookup("auth-oauth2-client-id"))
+	_ = v.BindPFlag("auth.oauth2.client_secret", fs.Lookup("auth-oauth2-client-secret"))
+	_ = v.BindPFlag("auth.oauth2.token_url", fs.Lookup("auth-oauth2-token-url"))
+	_ = v.BindPFlag("auth.oauth2.scopes", fs.Lookup("auth-oauth2-scopes"))
+	_ = v.BindPFlag("auth.cookie.base_url", fs.Lookup("auth-cookie-base-url"))
+	_ = v.BindPFlag("auth.cookie.username", fs.Lookup("auth-cookie-username"))
+	_ = v.BindPFlag("auth.cookie.password", fs.Lookup("auth-cookie-password"))
 
 	_ = v.BindPFlag("http.timeout", fs.Lookup("http-timeout"))
 
@@ -152,10 +148,6 @@ func initViper(v *viper.Viper, cmd *cobra.Command) error {
 	_ = v.BindPFlag("apis.camunda_api.base_url", fs.Lookup("api-camunda-base-url"))
 	_ = v.BindPFlag("apis.operate_api.base_url", fs.Lookup("api-operate-base-url"))
 	_ = v.BindPFlag("apis.tasklist_api.base_url", fs.Lookup("api-tasklist-base-url"))
-
-	v.Set("apis.camunda_api.key", config.CamundaApiKeyConst)
-	v.Set("apis.operate_api.key", config.OperateApiKeyConst)
-	v.Set("apis.tasklist_api.key", config.TasklistApiKeyConst)
 
 	v.SetDefault("http.timeout", "30s")
 
@@ -184,31 +176,13 @@ func initViper(v *viper.Viper, cmd *cobra.Command) error {
 	return nil
 }
 
-func retrieveConfig(v *viper.Viper, validate bool) (*config.Config, error) {
+func retrieveAndNormalizeConfig(v *viper.Viper) (*config.Config, error) {
 	var cfg config.Config
 	if err := v.Unmarshal(&cfg); err != nil {
 		return nil, fmt.Errorf("unmarshal config: %w", err)
 	}
-
-	if tmp := v.GetStringMapString("tmp.auth_scopes"); len(tmp) > 0 {
-		if cfg.Auth.OAuth2.Scopes == nil {
-			cfg.Auth.OAuth2.Scopes = make(map[string]string, len(tmp))
-		}
-		for k, scope := range tmp {
-			k = strings.TrimSpace(k)
-			scope = strings.TrimSpace(scope)
-			if k == "" || scope == "" {
-				continue
-			}
-			cfg.Auth.OAuth2.Scopes[k] = scope
-		}
+	if err := cfg.Normalize(); err != nil {
+		return nil, fmt.Errorf("normalize config: %w", err)
 	}
-
-	if validate {
-		if err := cfg.Validate(); err != nil {
-			return nil, fmt.Errorf("validate config: %w", err)
-		}
-	}
-
 	return &cfg, nil
 }

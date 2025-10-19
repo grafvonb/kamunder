@@ -17,7 +17,7 @@ var (
 
 var expectProcessInstanceCmd = &cobra.Command{
 	Use:     "process-instance",
-	Short:   "Expect a process instance to reach a certain state.",
+	Short:   "Expect a process instance to reach a certain state",
 	Aliases: []string{"pi"},
 	Run: func(cmd *cobra.Command, args []string) {
 		cli, log, err := NewCli(cmd)
@@ -40,7 +40,7 @@ var expectProcessInstanceCmd = &cobra.Command{
 
 func init() {
 	expectCmd.AddCommand(expectProcessInstanceCmd)
-	
+
 	expectProcessInstanceCmd.Flags().StringVarP(&flagExpectPIKey, "key", "k", "", "process instance key to expect a state for")
 	_ = expectProcessInstanceCmd.MarkFlagRequired("key")
 	expectProcessInstanceCmd.Flags().StringSliceVarP(&flagExpectPIStates, "state", "s", nil, "state of a process instance: ACTIVE, COMPLETED, CANCELED, TERMINATED or ABSENT")

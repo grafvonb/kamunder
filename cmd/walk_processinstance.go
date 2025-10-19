@@ -20,7 +20,7 @@ const (
 
 var walkProcessInstanceCmd = &cobra.Command{
 	Use:     "process-instance",
-	Short:   "Traverse (walk) the parent/child graph of process instances.",
+	Short:   "Traverse (walk) the parent/child graph of process instances",
 	Aliases: []string{"pi", "pis"},
 	Run: func(cmd *cobra.Command, args []string) {
 		cli, log, err := NewCli(cmd)

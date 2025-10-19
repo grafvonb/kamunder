@@ -14,12 +14,12 @@ const (
 )
 
 type BackoffConfig struct {
-	Strategy     BackoffStrategy `mapstructure:"strategy"`
-	InitialDelay time.Duration   `mapstructure:"initial_delay"`
-	MaxDelay     time.Duration   `mapstructure:"max_delay"`
-	MaxRetries   int             `mapstructure:"max_retries"`
-	Multiplier   float64         `mapstructure:"multiplier"` // Used for exponential backoff strategy
-	Timeout      time.Duration   `mapstructure:"timeout"`
+	Strategy     BackoffStrategy `mapstructure:"strategy" json:"strategy" yaml:"strategy"`
+	InitialDelay time.Duration   `mapstructure:"initial_delay" json:"initial_delay" yaml:"initial_delay"`
+	MaxDelay     time.Duration   `mapstructure:"max_delay" json:"max_delay" yaml:"max_delay"`
+	MaxRetries   int             `mapstructure:"max_retries" json:"max_retries" yaml:"max_retries"`
+	Multiplier   float64         `mapstructure:"multiplier" json:"multiplier" yaml:"multiplier"` // Used for exponential backoff strategy
+	Timeout      time.Duration   `mapstructure:"timeout" json:"timeout" yaml:"timeout"`
 }
 
 func (c BackoffConfig) NextDelay(prev time.Duration) time.Duration {
