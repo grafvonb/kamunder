@@ -101,7 +101,16 @@ func (s *Service) Editor() authenticator.RequestEditor {
 		if sameURL(req.URL, s.tokenURL) {
 			return nil
 		}
-		target := s.resolve(req)
+		var target string
+		u := req.URL.String()
+		switch {
+		case s.cfg.APIs.Camunda.RequireScope && strings.Contains(u, s.cfg.APIs.Camunda.BaseURL):
+			target = s.cfg.APIs.Camunda.Key
+		case s.cfg.APIs.Tasklist.RequireScope && strings.Contains(u, s.cfg.APIs.Tasklist.BaseURL):
+			target = s.cfg.APIs.Tasklist.Key
+		case s.cfg.APIs.Operate.RequireScope && strings.Contains(u, s.cfg.APIs.Operate.BaseURL):
+			target = s.cfg.APIs.Operate.Key
+		}
 		tok, err := s.RetrieveTokenForAPI(ctx, target)
 		if err != nil {
 			return err

@@ -37,7 +37,6 @@ var configCmd = &cobra.Command{
 			if err != nil {
 				ferrors.HandleAndExit(log, fmt.Errorf("marshaling configuration to YAML: %w", err))
 			}
-
 			cmd.Println(yCfg)
 			return nil
 		}
