@@ -90,6 +90,9 @@ var rootCmd = &cobra.Command{
 }
 
 func Execute() {
+	if (len(os.Args)) == 1 {
+		rootCmd.SetArgs([]string{"--help"})
+	}
 	if err := rootCmd.Execute(); err != nil {
 		os.Exit(1)
 	}
