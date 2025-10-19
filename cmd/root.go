@@ -122,10 +122,10 @@ func init() {
 
 	pf.String("http-timeout", "", "HTTP timeout (Go duration, e.g. 30s)")
 
-	pf.StringP("camunda-apis-version", "a", string(toolx.Current), fmt.Sprintf("Camunda API version (supported: %v)", toolx.Supported()))
-	pf.String("camunda-base-url", "", "Camunda API base URL")
-	pf.String("operate-base-url", "", "Operate API base URL")
-	pf.String("tasklist-base-url", "", "Tasklist API base URL")
+	pf.StringP("camunda-version", "a", string(toolx.CurrentCamundaVersion), fmt.Sprintf("Camunda version (%s) expected. Causes usage of specific API versions.", toolx.SupportedCamundaVersionsString()))
+	pf.String("api-camunda-base-url", "", "Camunda API base URL")
+	pf.String("api-operate-base-url", "", "Operate API base URL")
+	pf.String("api-tasklist-base-url", "", "Tasklist API base URL")
 
 	pf.BoolVar(&flagShowConfig, "show-config", false, "print effective config (secrets redacted)")
 }
@@ -148,10 +148,10 @@ func initViper(v *viper.Viper, cmd *cobra.Command) error {
 
 	_ = v.BindPFlag("http.timeout", fs.Lookup("http-timeout"))
 
-	_ = v.BindPFlag("apis.version", fs.Lookup("camunda-apis-version"))
-	_ = v.BindPFlag("apis.camunda_api.base_url", fs.Lookup("camunda-base-url"))
-	_ = v.BindPFlag("apis.operate_api.base_url", fs.Lookup("operate-base-url"))
-	_ = v.BindPFlag("apis.tasklist_api.base_url", fs.Lookup("tasklist-base-url"))
+	_ = v.BindPFlag("apis.version", fs.Lookup("camunda-version"))
+	_ = v.BindPFlag("apis.camunda_api.base_url", fs.Lookup("api-camunda-base-url"))
+	_ = v.BindPFlag("apis.operate_api.base_url", fs.Lookup("api-operate-base-url"))
+	_ = v.BindPFlag("apis.tasklist_api.base_url", fs.Lookup("api-tasklist-base-url"))
 
 	v.Set("apis.camunda_api.key", config.CamundaApiKeyConst)
 	v.Set("apis.operate_api.key", config.OperateApiKeyConst)

@@ -78,7 +78,7 @@ func ITConfigFromEnv(t *testing.T) *config.Config {
 			Tasklist: config.API{
 				BaseURL: RequireEnvWithPrefix(t, "TASKLIST_API_BASE_URL"),
 			},
-			Version: toolx.APIVersion(RequireEnvWithPrefix(t, "API_VERSION")),
+			Version: toolx.CamundaVersion(RequireEnvWithPrefix(t, "API_VERSION")),
 		},
 		HTTP: config.HTTP{Timeout: "30s"},
 	}

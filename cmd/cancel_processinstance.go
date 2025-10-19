@@ -5,7 +5,6 @@ import (
 
 	"github.com/grafvonb/kamunder/kamunder/ferrors"
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
 )
 
 var (
@@ -32,8 +31,6 @@ var cancelProcessInstanceCmd = &cobra.Command{
 
 func init() {
 	cancelCmd.AddCommand(cancelProcessInstanceCmd)
-
-	AddBackoffFlagsAndBindings(cancelProcessInstanceCmd, viper.GetViper())
 
 	cancelProcessInstanceCmd.Flags().StringVarP(&flagCancelPIKey, "key", "k", "", "process instance key to cancel")
 	_ = cancelProcessInstanceCmd.MarkFlagRequired("key")

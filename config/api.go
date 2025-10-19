@@ -21,19 +21,19 @@ var ValidAPIKeys = []string{
 }
 
 type APIs struct {
-	Version  toolx.APIVersion `mapstructure:"version"`
-	Camunda  API              `mapstructure:"camunda_api"`
-	Operate  API              `mapstructure:"operate_api"`
-	Tasklist API              `mapstructure:"tasklist_api"`
+	Version  toolx.CamundaVersion `mapstructure:"version"`
+	Camunda  API                  `mapstructure:"camunda_api"`
+	Operate  API                  `mapstructure:"operate_api"`
+	Tasklist API                  `mapstructure:"tasklist_api"`
 }
 
 func (a *APIs) Validate() error {
 	var errs []error
 	switch a.Version {
 	case "":
-		a.Version = toolx.Current
+		a.Version = toolx.CurrentCamundaVersion
 	default:
-		v, err := toolx.Normalize(string(a.Version))
+		v, err := toolx.NormalizeCamundaVersion(string(a.Version))
 		if err != nil {
 			errs = append(errs, fmt.Errorf("version: %w", err))
 		} else {

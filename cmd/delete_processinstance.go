@@ -5,7 +5,6 @@ import (
 
 	"github.com/grafvonb/kamunder/kamunder/ferrors"
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
 )
 
 var (
@@ -32,9 +31,7 @@ var deleteProcessInstanceCmd = &cobra.Command{
 
 func init() {
 	deleteCmd.AddCommand(deleteProcessInstanceCmd)
-
-	AddBackoffFlagsAndBindings(deleteProcessInstanceCmd, viper.GetViper())
-
+	
 	deleteProcessInstanceCmd.Flags().StringVarP(&flagDeletePIKey, "key", "k", "", "process instance key to delete")
 	_ = deleteProcessInstanceCmd.MarkFlagRequired("key")
 	deleteProcessInstanceCmd.Flags().BoolVar(&flagDeleteWithCancel, "with-cancel", false, "cancel the process instance before deleting it")

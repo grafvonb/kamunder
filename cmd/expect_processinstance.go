@@ -8,7 +8,6 @@ import (
 	"github.com/grafvonb/kamunder/kamunder/ferrors"
 	"github.com/grafvonb/kamunder/kamunder/process"
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
 )
 
 var (
@@ -41,9 +40,7 @@ var expectProcessInstanceCmd = &cobra.Command{
 
 func init() {
 	expectCmd.AddCommand(expectProcessInstanceCmd)
-
-	AddBackoffFlagsAndBindings(expectProcessInstanceCmd, viper.GetViper())
-
+	
 	expectProcessInstanceCmd.Flags().StringVarP(&flagExpectPIKey, "key", "k", "", "process instance key to expect a state for")
 	_ = expectProcessInstanceCmd.MarkFlagRequired("key")
 	expectProcessInstanceCmd.Flags().StringSliceVarP(&flagExpectPIStates, "state", "s", nil, "state of a process instance: ACTIVE, COMPLETED, CANCELED, TERMINATED or ABSENT")

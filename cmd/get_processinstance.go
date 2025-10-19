@@ -6,7 +6,6 @@ import (
 	"github.com/grafvonb/kamunder/kamunder/ferrors"
 	"github.com/grafvonb/kamunder/kamunder/process"
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
 )
 
 const maxPISearchSize int32 = 1000
@@ -95,8 +94,6 @@ var getProcessInstanceCmd = &cobra.Command{
 
 func init() {
 	getCmd.AddCommand(getProcessInstanceCmd)
-
-	AddBackoffFlagsAndBindings(getProcessInstanceCmd, viper.GetViper())
 
 	fs := getProcessInstanceCmd.Flags()
 	fs.StringVarP(&flagPIKey, "key", "k", "", "resource key (e.g. process instance) to fetch")

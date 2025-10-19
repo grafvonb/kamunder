@@ -5,7 +5,6 @@ import (
 
 	"github.com/grafvonb/kamunder/kamunder/ferrors"
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
 )
 
 var getClusterTopologyCmd = &cobra.Command{
@@ -29,6 +28,4 @@ var getClusterTopologyCmd = &cobra.Command{
 
 func init() {
 	getCmd.AddCommand(getClusterTopologyCmd)
-
-	AddBackoffFlagsAndBindings(getCmd, viper.GetViper())
 }

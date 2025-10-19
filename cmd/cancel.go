@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 )
 
 var (
@@ -22,4 +23,6 @@ func init() {
 	rootCmd.AddCommand(cancelCmd)
 
 	cancelCmd.PersistentFlags().BoolVarP(&flagCancelWait, "wait", "w", false, "wait for the cancellation to be completed")
+
+	addBackoffFlagsAndBindings(cancelCmd, viper.GetViper())
 }
