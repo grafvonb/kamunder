@@ -86,10 +86,12 @@ var rootCmd = &cobra.Command{
 		return cmd.Help()
 	},
 	SilenceUsage:  true,
-	SilenceErrors: false,
+	SilenceErrors: true,
 }
 
 func Execute() {
+	rootCmd.SetOut(os.Stdout)
+	rootCmd.SetErr(os.Stderr)
 	if (len(os.Args)) == 1 {
 		rootCmd.SetArgs([]string{"--help"})
 	}
