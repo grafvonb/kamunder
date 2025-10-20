@@ -76,7 +76,7 @@ func init() {
 	walkCmd.AddCommand(walkProcessInstanceCmd)
 
 	fs := walkProcessInstanceCmd.Flags()
-	fs.StringVar(&flagWalkKey, "key", "", "start walking from this process instance key")
+	fs.StringVarP(&flagWalkKey, "key", "k", "", "start walking from this process instance key")
 	_ = walkProcessInstanceCmd.MarkFlagRequired("key")
 
 	fs.StringVar(&flagWalkMode, "mode", modeParent, "walk mode: parent, children, family")

@@ -2,50 +2,19 @@
 <img src="./docs/logo/kamunder_bkg_white_900x300.png" alt="kamunder logo" style="border-radius: 5px;" height="150px" />
 </p>
 
-# Kamunder – a CLI for Camunda 8.x
+# Kamunder - a CLI for Camunda 8.x
 
 **Kamunder** is a CLI (command-line interface) for Camunda 8 that gives developers and operators faster, scriptable management of Camunda resources.
 It complements Camunda's [Operate](https://docs.camunda.io/docs/components/operate/overview/) and [Tasklist](https://docs.camunda.io/docs/components/tasklist/overview/) by enabling automation, bulk operations, and integration into existing workflows and pipelines.
 
 While Operate and Tasklist cover most use cases via web interfaces, a CLI can be more efficient for automation, scripting, and quick operational tasks.  
 
-**Kamunder** fills this gap with commands such as `get`, `cancel`, and `delete`, 
-as well as specialized use cases like *[deleting active process instances by canceling it first](#deleting-an-active-process-instance-by-cancelling-it-first)* 
-or *[finding process instances with orphan parent process instances](#finding-process-instances-with-orphan-parent-process-instances)*, 
-which simplify recurring administration and maintenance of Camunda 8 process instances. 
-
-See [Kamunder in Action](#kamunder-in-action) for more examples.
-
-## Table of Contents
-- [Kamunder – a CLI for Camunda 8](#kamunder--a-cli-for-camunda-8)
-- [Quick Start with Camunda 8 Run](#quick-start-with-camunda-8-run)
-- [Highlights](#highlights)
-- [Supported Camunda 8 APIs](#supported-camunda-8-apis)
-- [Configuration](#configuration)
-    - [Choose authentication method](#choose-authentication-method)
-        - [Authentication with OAuth2 (OIDC)](#authentication-with-oauth2-oidc)
-        - [Authentication with API Cookie (development with Camunda 8 Run only)](#authentication-with-api-cookie-development-with-camunda-8-run-only)
-    - [Connecting to Camunda 8 APIs](#connecting-to-camunda-8-apis)
-        - [If you use Camunda 8 Run with API Cookie Authentication (Development only)](#if-you-use-camunda-8-run-with-api-cookie-authentication-development-only)
-        - [If you use Camunda 8 with OAuth2 (oidc) authentication](#if-you-use-camunda-8-with-oauth2-oidc-authentication)
-    - [Ways to provide settings](#ways-to-provide-settings)
-    - [Precedence](#precedence)
-    - [Default configuration file locations](#default-configuration-file-locations)
-    - [File format](#file-format)
-    - [Environment variables](#environment-variables)
-    - [Security note](#security-note)
-    - [Example: Show effective configuration](#example-show-effective-configuration)
-- [Usage Help](#usage-help)
-- [Kamunder in Action](#kamunder-in-action)
-    - [Deleting an active process instance by cancelling it first](#deleting-an-active-process-instance-by-cancelling-it-first)
-    - [Finding process instances with orphan parent process instances](#finding-process-instances-with-orphan-parent-process-instances)
-    - [Listing process instances for a specific process definition (model) and its first version](#listing-process-instances-for-a-specific-process-definition-model-and-its-first-version)
 
  
-## Quick Start with Camunda 8 Run
+## Quick Start with Kamunder
 
-1. **Install Camunda 8.7 Run**  
-   Download Camunda 8 Run from the [Camunda Releases](https://github.com/camunda/camunda/releases?q=%22c8run-8.7%22&expanded=true) page, unpack and start it with `./start.sh`.
+1. **Install Camunda 8.8 Run**  
+   Download [Camunda 8 Run](https://downloads.camunda.cloud/release/camunda/c8run/8.8/), unpack and start it with `./start.sh`.
 2. **Install Kamunder**  
    Download the latest release from the [Kamunder Releases](https://github.com/grafvonb/kamunder/releases) page and unpack it.
 3. **Configure Kamunder**  
@@ -57,7 +26,7 @@ See [Kamunder in Action](#kamunder-in-action) for more examples.
         base_url: "http://localhost:8080"
     
     apis:
-      version: "87"
+      version: "8.8"
       camunda_api:
         base_url: "http://localhost:8080/v2"
     ```
@@ -85,11 +54,11 @@ See [Kamunder in Action](#kamunder-in-action) for more examples.
             }
           ],
           "Port": 26501,
-          "Version": "8.7.12"
+          "Version": "8.8.0"
         }
       ],
       "ClusterSize": 1,
-      "GatewayVersion": "8.7.12",
+      "GatewayVersion": "8.8.0",
       "PartitionsCount": 1,
       "ReplicationFactor": 1,
       "LastCompletedChangeId": ""

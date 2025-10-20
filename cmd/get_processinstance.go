@@ -96,7 +96,7 @@ func init() {
 	getCmd.AddCommand(getProcessInstanceCmd)
 
 	fs := getProcessInstanceCmd.Flags()
-	fs.StringVarP(&flagPIKey, "key", "k", "", "resource key (e.g. process instance) to fetch")
+	fs.StringVarP(&flagPIKey, "key", "k", "", "process instance key to fetch")
 	fs.StringVarP(&flagPIBpmnProcessID, "bpmn-process-id", "b", "", "BPMN process ID to filter process instances")
 	fs.Int32VarP(&flagPIProcessVersion, "process-version", "v", 0, "process definition version")
 	fs.StringVar(&flagPIProcessVersionTag, "process-version-tag", "", "process definition version tag")

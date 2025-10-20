@@ -21,8 +21,8 @@ import (
 const wrongStateMessage400 = "Process instances needs to be in one of the states [COMPLETED, CANCELED]"
 
 type Service struct {
-	cc  *camundav87.ClientWithResponses
-	oc  *operatev87.ClientWithResponses
+	cc  GenClusterClientCamunda
+	oc  GenClusterClientOperate
 	cfg *config.Config
 	log *slog.Logger
 }
