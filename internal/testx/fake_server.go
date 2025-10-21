@@ -41,6 +41,55 @@ var objectResponses = map[string]string{
 	}`,
 }
 
+var createResponses = map[string]string{
+	"/v2/deployments": `{
+	  "tenantId": "customer-service",
+	  "deploymentKey": "key-2251799813686749",
+	  "deployments": [
+		{
+		  "processDefinition": {
+			"processDefinitionId": "new-account-onboarding-workflow",
+			"processDefinitionVersion": 0,
+			"resourceName": "string",
+			"tenantId": "customer-service",
+			"processDefinitionKey": "2251799813686749"
+		  },
+		  "decisionDefinition": {
+			"decisionDefinitionId": "new-hire-onboarding-workflow",
+			"version": 0,
+			"name": "string",
+			"tenantId": "customer-service",
+			"decisionRequirementsId": "string",
+			"decisionDefinitionKey": "2251799813326547",
+			"decisionRequirementsKey": "2251799813683346"
+		  },
+		  "decisionRequirements": {
+			"decisionRequirementsId": "string",
+			"version": 0,
+			"decisionRequirementsName": "string",
+			"tenantId": "customer-service",
+			"resourceName": "string",
+			"decisionRequirementsKey": "2251799813683346"
+		  },
+		  "form": {
+			"formId": "Form_1nx5hav",
+			"version": 0,
+			"resourceName": "string",
+			"tenantId": "customer-service",
+			"formKey": "2251799813684365"
+		  },
+		  "resource": {
+			"resourceId": "string",
+			"version": 0,
+			"resourceName": "string",
+			"tenantId": "customer-service",
+			"resourceKey": "2251799813686749"
+		  }
+		}
+	  ]
+	}`,
+}
+
 var (
 	onceFS   sync.Once
 	sharedFS *FakeServer
@@ -51,26 +100,35 @@ type FakeServer struct {
 	BaseURL string
 }
 
-// NewFakeServer returns a FakeServer with fixed responses
 func NewFakeServer(t *testing.T) *FakeServer {
 	t.Helper()
 	onceFS.Do(func() {
 		fs := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			if r.Method != http.MethodGet {
+			switch r.Method {
+			case http.MethodGet:
+				if resp, ok := collectionResponses[r.URL.Path]; ok {
+					w.Header().Set("Content-Type", "application/json")
+					_, _ = w.Write([]byte(resp))
+					return
+				}
+				if resp, ok := objectResponses[r.URL.Path]; ok {
+					w.Header().Set("Content-Type", "application/json")
+					_, _ = w.Write([]byte(resp))
+					return
+				}
+				http.NotFound(w, r)
+			case http.MethodPost:
+				// accept multipart or json; no parsing needed for tests
+				if resp, ok := createResponses[r.URL.Path]; ok {
+					w.Header().Set("Content-Type", "application/json")
+					w.WriteHeader(http.StatusOK) // Camunda returns 200 for deployments
+					_, _ = w.Write([]byte(resp))
+					return
+				}
+				http.NotFound(w, r)
+			default:
 				http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
-				return
 			}
-			if resp, ok := collectionResponses[r.URL.Path]; ok {
-				w.Header().Set("Content-Type", "application/json")
-				_, _ = w.Write([]byte(resp))
-				return
-			}
-			if resp, ok := objectResponses[r.URL.Path]; ok {
-				w.Header().Set("Content-Type", "application/json")
-				_, _ = w.Write([]byte(resp))
-				return
-			}
-			http.NotFound(w, r)
 		}))
 		sharedFS = &FakeServer{
 			FS:      fs,

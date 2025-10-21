@@ -8,7 +8,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func Test_Internal_Cluster_v88_GetClusterTopology_OK(t *testing.T) {
+func Test_Internal_Deployment_v88_Deploy_OK(t *testing.T) {
 	ctx := testx.ITCtx(t, 20*time.Second)
 	cfg := testx.TestConfig(t)
 	log := testx.Logger(t)
@@ -20,10 +20,11 @@ func Test_Internal_Cluster_v88_GetClusterTopology_OK(t *testing.T) {
 	svc, err := New(cfg, httpClient, log)
 	require.NoError(t, err)
 
-	topology, err := svc.GetClusterTopology(ctx)
+	s := "<xml>content</xml>"
+	d, err := svc.Deploy(ctx, []byte(s))
 	require.NoError(t, err)
-	require.NotEmpty(t, topology)
+	require.NotEmpty(t, d)
 
-	t.Logf("success: got cluster topology")
-	testx.LogJson(t, topology)
+	t.Logf("success: got deployment")
+	testx.LogJson(t, d)
 }
