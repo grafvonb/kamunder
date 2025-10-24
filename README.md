@@ -2,14 +2,17 @@
 <img src="./docs/logo/kamunder_bkg_white_900x300.png" alt="kamunder logo" style="border-radius: 5px;" height="150px" />
 </p>
 
-# Kamunder - a CLI for Camunda 8.x
+# Kamunder - Yet Another Camunda 8 CLI Tool?
 
-**Kamunder** is a CLI (command-line interface) for Camunda 8 that gives developers and operators faster, scriptable management of Camunda resources.
-It complements Camunda's [Operate](https://docs.camunda.io/docs/components/operate/overview/) and [Tasklist](https://docs.camunda.io/docs/components/tasklist/overview/) by enabling automation, bulk operations, and integration into existing workflows and pipelines.
+No – Kamunder is different. Its design and development focus on operational effectiveness, ensuring that done is done.
+There are plenty of operational tasks where you want to be sure that:
 
-While Operate and Tasklist cover most use cases via web interfaces, a CLI can be more efficient for automation, scripting, and quick operational tasks.  
+* A process was canceled – is it really in the cancelled state?
+* A process tree was deleted – are all instances truly gone?
+* A process instance was started – has it already reached the expected user task?
+* A process variable was set – does it hold the correct value?
 
-
+Kamunder focuses on real operational use cases while still providing the familiar CLI functionality such as standard CRUD commands on various resources.
  
 ## Quick Start with Kamunder
 
