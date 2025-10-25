@@ -10,6 +10,8 @@ import (
 	csvc "github.com/grafvonb/kamunder/internal/services/cluster"
 	pdsvc "github.com/grafvonb/kamunder/internal/services/processdefinition"
 	pisvc "github.com/grafvonb/kamunder/internal/services/processinstance"
+	rsvc "github.com/grafvonb/kamunder/internal/services/resource"
+	"github.com/grafvonb/kamunder/kamunder/resource"
 
 	"github.com/grafvonb/kamunder/kamunder/cluster"
 	"github.com/grafvonb/kamunder/kamunder/process"
@@ -53,11 +55,16 @@ func New(opts ...Option) (API, error) {
 	if err != nil {
 		return nil, err
 	}
+	rAPI, err := rsvc.New(c.cfg, c.http, c.log)
+	if err != nil {
+		return nil, err
+	}
 
 	return &client{
-		ClusterAPI: cluster.New(cAPI),
-		ProcessAPI: process.New(pdAPI, piAPI),
-		TaskAPI:    task.New(pdAPI, piAPI),
+		ClusterAPI:  cluster.New(cAPI),
+		ProcessAPI:  process.New(pdAPI, piAPI),
+		TaskAPI:     task.New(pdAPI, piAPI),
+		ResourceAPI: resource.New(rAPI),
 		capsFunc: func(context.Context) (Capabilities, error) {
 			return Capabilities{
 				APIVersion: string(c.cfg.APIs.Version),
@@ -76,6 +83,7 @@ type cfg struct {
 type ClusterAPI = cluster.API
 type ProcessAPI = process.API
 type TaskAPI = task.API
+type ResourceAPI = resource.API
 
 var _ API = (*client)(nil)
 
@@ -83,6 +91,7 @@ type client struct {
 	ClusterAPI
 	ProcessAPI
 	TaskAPI
+	ResourceAPI
 
 	capsFunc func(context.Context) (Capabilities, error)
 }

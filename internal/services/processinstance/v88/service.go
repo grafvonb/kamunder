@@ -20,7 +20,6 @@ import (
 
 const wrongStateMessage400 = "Process instances needs to be in one of the states [COMPLETED, CANCELED]"
 
-// nolint
 type Service struct {
 	cc  *camundav88.ClientWithResponses
 	oc  *operatev88.ClientWithResponses

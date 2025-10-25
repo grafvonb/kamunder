@@ -5,6 +5,7 @@ import (
 
 	"github.com/grafvonb/kamunder/kamunder/cluster"
 	"github.com/grafvonb/kamunder/kamunder/process"
+	"github.com/grafvonb/kamunder/kamunder/resource"
 	"github.com/grafvonb/kamunder/kamunder/task"
 )
 
@@ -13,6 +14,7 @@ type API interface {
 	process.API
 	task.API
 	cluster.API
+	resource.API
 }
 
 type Capabilities struct {

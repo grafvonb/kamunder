@@ -17,3 +17,9 @@ type ProcessDefinitionDeployment struct {
 	ResourceName             string `json:"resourceName,omitempty"`
 	TenantId                 string `json:"tenantId,omitempty"`
 }
+
+type DeploymentUnitData struct {
+	Name        string // filename for multipart
+	ContentType string // e.g. application/xml
+	Data        []byte
+}

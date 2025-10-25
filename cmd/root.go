@@ -86,7 +86,7 @@ var rootCmd = &cobra.Command{
 		return cmd.Help()
 	},
 	SilenceUsage:  true,
-	SilenceErrors: true,
+	SilenceErrors: false,
 }
 
 func Execute() {

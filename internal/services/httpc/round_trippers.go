@@ -1,16 +1,19 @@
 package httpc
 
 import (
+	"bytes"
+	"io"
 	"log/slog"
 	"net/http"
+	"net/http/httputil"
 
 	"github.com/grafvonb/kamunder/internal/services/auth/authenticator"
 )
 
 type LogTransport struct {
-	base http.RoundTripper
-
-	Log *slog.Logger
+	base     http.RoundTripper
+	WithBody bool
+	Log      *slog.Logger
 }
 
 func (t *LogTransport) rt() http.RoundTripper {
@@ -24,13 +27,37 @@ func (t *LogTransport) rt() http.RoundTripper {
 }
 
 func (t *LogTransport) RoundTrip(req *http.Request) (*http.Response, error) {
+	if t.WithBody {
+		// clone body to avoid consuming it
+		var bodyCopy []byte
+		if req.Body != nil {
+			bodyCopy, _ = httputil.DumpRequestOut(req, true)
+		} else {
+			bodyCopy, _ = httputil.DumpRequestOut(req, false)
+		}
+		// restore body if needed
+		if req.Body != nil && len(bodyCopy) > 0 {
+			// DumpRequestOut already reads body, so rebuild it
+			req.Body = io.NopCloser(bytes.NewReader(extractBody(bodyCopy)))
+		}
+		t.Log.Debug(string(bodyCopy))
+		return t.rt().RoundTrip(req)
+	}
 	t.Log.Debug("calling: " + req.URL.String())
 	return t.rt().RoundTrip(req)
 }
 
-type AuthTransport struct {
-	base http.RoundTripper
+// helper to extract body part from DumpRequestOut output
+func extractBody(dump []byte) []byte {
+	parts := bytes.SplitN(dump, []byte("\r\n\r\n"), 2)
+	if len(parts) == 2 {
+		return parts[1]
+	}
+	return nil
+}
 
+type AuthTransport struct {
+	base   http.RoundTripper
 	Editor authenticator.RequestEditor
 }
 

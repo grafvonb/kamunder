@@ -5,7 +5,9 @@ import (
 	"context"
 	"fmt"
 	"log/slog"
+	"mime/multipart"
 	"net/http"
+	"net/textproto"
 
 	"github.com/grafvonb/kamunder/config"
 	camundav88 "github.com/grafvonb/kamunder/internal/clients/camunda/v88/camunda"
@@ -22,6 +24,7 @@ type Service struct {
 
 type Option func(*Service)
 
+//nolint:unused
 func WithClient(c GenResourceClient) Option { return func(s *Service) { s.c = c } }
 
 func New(cfg *config.Config, httpClient *http.Client, log *slog.Logger, opts ...Option) (*Service, error) {
@@ -39,9 +42,33 @@ func New(cfg *config.Config, httpClient *http.Client, log *slog.Logger, opts ...
 	return s, nil
 }
 
-func (s *Service) Deploy(ctx context.Context, unit []byte, opts ...services.CallOption) (d.Deployment, error) {
+func (s *Service) Deploy(ctx context.Context, tenantId string, units []d.DeploymentUnitData, opts ...services.CallOption) (d.Deployment, error) {
 	_ = services.ApplyCallOptions(opts)
-	resp, err := s.c.CreateDeploymentWithBodyWithResponse(ctx, "application/xml", bytes.NewReader(unit))
+
+	var buf bytes.Buffer
+	w := multipart.NewWriter(&buf)
+	if tenantId != "" {
+		if err := w.WriteField("tenantId", tenantId); err != nil {
+			return d.Deployment{}, err
+		}
+	}
+	for _, u := range units {
+		h := make(textproto.MIMEHeader)
+		h.Set("Content-Disposition", `form-data; name="resources"; filename="`+u.Name+`"`)
+		part, err := w.CreatePart(h)
+		if err != nil {
+			return d.Deployment{}, err
+		}
+		if _, err = part.Write(u.Data); err != nil {
+			return d.Deployment{}, err
+		}
+	}
+	if err := w.Close(); err != nil {
+		return d.Deployment{}, err
+	}
+	ct := w.FormDataContentType()
+
+	resp, err := s.c.CreateDeploymentWithBodyWithResponse(ctx, ct, bytes.NewReader(buf.Bytes()))
 	if err != nil {
 		return d.Deployment{}, err
 	}

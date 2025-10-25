@@ -58,7 +58,7 @@ func New(cfg *config.Config, log *slog.Logger, opts ...Option) (*Service, error)
 	if err != nil {
 		return nil, err
 	}
-	httpClient := &http.Client{Timeout: d, Transport: &LogTransport{Log: log}}
+	httpClient := &http.Client{Timeout: d, Transport: &LogTransport{Log: log, WithBody: false}}
 	s := &Service{c: httpClient, cfg: cfg, log: log}
 	for _, opt := range opts {
 		opt(s)

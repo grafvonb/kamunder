@@ -1,9 +1,7 @@
 package v87
 
 import (
-	"bytes"
 	"context"
-	"fmt"
 	"log/slog"
 	"net/http"
 
@@ -11,7 +9,6 @@ import (
 	camundav87 "github.com/grafvonb/kamunder/internal/clients/camunda/v87/camunda"
 	d "github.com/grafvonb/kamunder/internal/domain"
 	"github.com/grafvonb/kamunder/internal/services"
-	"github.com/grafvonb/kamunder/internal/services/httpc"
 )
 
 type Service struct {
@@ -22,6 +19,7 @@ type Service struct {
 
 type Option func(*Service)
 
+//nolint:unused
 func WithClient(c GenResourceClient) Option { return func(s *Service) { s.c = c } }
 
 func New(cfg *config.Config, httpClient *http.Client, log *slog.Logger, opts ...Option) (*Service, error) {
@@ -39,18 +37,7 @@ func New(cfg *config.Config, httpClient *http.Client, log *slog.Logger, opts ...
 	return s, nil
 }
 
-func (s *Service) Deploy(ctx context.Context, unit []byte, opts ...services.CallOption) (d.Deployment, error) {
+func (s *Service) Deploy(ctx context.Context, tenantId string, units []d.DeploymentUnitData, opts ...services.CallOption) (d.Deployment, error) {
 	_ = services.ApplyCallOptions(opts)
-	resp, err := s.c.PostDeploymentsWithBodyWithResponse(ctx, "application/xml", bytes.NewReader(unit))
-	if err != nil {
-		return d.Deployment{}, err
-	}
-	if err = httpc.HttpStatusErr(resp.HTTPResponse, resp.Body); err != nil {
-		return d.Deployment{}, err
-	}
-	if resp.JSON200 == nil {
-		return d.Deployment{}, fmt.Errorf("%w: 200 OK but empty payload; body=%s",
-			d.ErrMalformedResponse, string(resp.Body))
-	}
-	return fromDeploymentResult(*resp.JSON200), nil
+	return d.Deployment{}, nil
 }

@@ -7,8 +7,8 @@ import (
 
 	"github.com/grafvonb/kamunder/config"
 	"github.com/grafvonb/kamunder/internal/services"
-	v87 "github.com/grafvonb/kamunder/internal/services/cluster/v87"
-	v88 "github.com/grafvonb/kamunder/internal/services/cluster/v88"
+	v87 "github.com/grafvonb/kamunder/internal/services/resource/v87"
+	v88 "github.com/grafvonb/kamunder/internal/services/resource/v88"
 	"github.com/grafvonb/kamunder/toolx"
 )
 

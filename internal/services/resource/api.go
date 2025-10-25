@@ -5,12 +5,12 @@ import (
 
 	d "github.com/grafvonb/kamunder/internal/domain"
 	"github.com/grafvonb/kamunder/internal/services"
-	v87 "github.com/grafvonb/kamunder/internal/services/cluster/v87"
-	v88 "github.com/grafvonb/kamunder/internal/services/cluster/v88"
+	v87 "github.com/grafvonb/kamunder/internal/services/resource/v87"
+	v88 "github.com/grafvonb/kamunder/internal/services/resource/v88"
 )
 
 type API interface {
-	GetClusterTopology(ctx context.Context, opts ...services.CallOption) (d.Topology, error)
+	Deploy(ctx context.Context, tenantId string, units []d.DeploymentUnitData, opts ...services.CallOption) (d.Deployment, error)
 }
 
 var _ API = (*v87.Service)(nil)
